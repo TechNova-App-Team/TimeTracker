@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arbeitszeiterfassung</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            color: #fff;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .icon {
+            width: 1.75rem;
+            height: 1.75rem;
+            color: #a855f7;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            color: #71717a;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .settings-btn {
+            background: #27272a;
+            border: none;
+            color: #71717a;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .settings-btn:hover {
+            color: #a855f7;
+            background: #3f3f46;
+        }
+
+        .settings-panel {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        .settings-panel.active {
+            display: block;
+        }
+
+        .settings-title {
+            font-size: 1.125rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .setting-row label {
+            color: #a1a1aa;
+        }
+
+        .setting-row input {
+            width: 6rem;
+            padding: 0.5rem 0.75rem;
+            background: #27272a;
+            border: 1px solid #3f3f46;
+            border-radius: 0.5rem;
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .setting-row input:focus {
+            outline: none;
+            border-color: #a855f7;
+        }
+
+        .save-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: #9333ea;
+            color: #fff;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: all 0.2s;
+        }
+
+        .save-btn:hover {
+            background: #7e22ce;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+
+        .stat-label {
+            color: #71717a;
+            font-size: 0.75rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .stat-value.positive {
+            color: #a855f7;
+        }
+
+        .stat-value.negative {
+            color: #ef4444;
+        }
+
+        .input-section h2 {
+            font-size: 1.125rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            background: #27272a;
+            border: 1px solid #3f3f46;
+            border-radius: 0.5rem;
+            color: #fff;
+            font-size: 1.125rem;
+        }
+
+        .input-group input::placeholder {
+            color: #71717a;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #a855f7;
+        }
+
+        .add-btn {
+            padding: 0.75rem 2rem;
+            background: #9333ea;
+            color: #fff;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .add-btn:hover {
+            background: #7e22ce;
+        }
+
+        .entries-section h2 {
+            font-size: 1.125rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .entries-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .entry-item {
+            background: #27272a;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .entry-item:hover {
+            background: #3f3f46;
+        }
+
+        .entry-info {
+            flex: 1;
+        }
+
+        .entry-date {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .entry-details {
+            color: #71717a;
+            font-size: 0.875rem;
+        }
+
+        .entry-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .entry-value {
+            font-size: 1.125rem;
+            font-weight: bold;
+        }
+
+        .entry-value.positive {
+            color: #a855f7;
+        }
+
+        .entry-value.negative {
+            color: #ef4444;
+        }
+
+        .delete-btn {
+            padding: 0.25rem 0.75rem;
+            background: #3f3f46;
+            color: #a1a1aa;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.25rem;
+        }
+
+        .delete-btn:hover {
+            background: #dc2626;
+            color: #fff;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #71717a;
+            padding: 3rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="card">
+            <div class="header">
+                <div class="header-left">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    <div>
+                        <h1>Arbeitszeiterfassung</h1>
+                        <p class="subtitle" id="currentDate"></p>
+                    </div>
+                </div>
+                <button class="settings-btn" onclick="toggleSettings()">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M12 1v6m0 6v6m9-9h-6m-6 0H3m15.4-5.6l-4.2 4.2m-4.2 4.2L5.6 18.4m12.8 0l-4.2-4.2m-4.2-4.2L5.6 5.6"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="settings-panel" id="settingsPanel">
+                <h3 class="settings-title">Reguläre Arbeitszeiten</h3>
+                <div class="setting-row">
+                    <label>Montag</label>
+                    <input type="number" step="0.25" id="hoursMonday" value="8.75">
+                </div>
+                <div class="setting-row">
+                    <label>Dienstag</label>
+                    <input type="number" step="0.25" id="hoursTuesday" value="8.75">
+                </div>
+                <div class="setting-row">
+                    <label>Mittwoch</label>
+                    <input type="number" step="0.25" id="hoursWednesday" value="8.75">
+                </div>
+                <div class="setting-row">
+                    <label>Donnerstag</label>
+                    <input type="number" step="0.25" id="hoursThursday" value="8.75">
+                </div>
+                <div class="setting-row">
+                    <label>Freitag</label>
+                    <input type="number" step="0.25" id="hoursFriday" value="4.5">
+                </div>
+                <button class="save-btn" onclick="saveSettings()">Speichern</button>
+            </div>
+        </div>
+
+        <!-- Statistiken -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">WOCHE</div>
+                <div class="stat-value" id="weekStat">+0.00h</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">MONAT</div>
+                <div class="stat-value" id="monthStat">+0.00h</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">JAHR</div>
+                <div class="stat-value" id="yearStat">+0.00h</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">GESAMT</div>
+                <div class="stat-value" id="totalStat">+0.00h</div>
+            </div>
+        </div>
+
+        <!-- Eingabe -->
+        <div class="card input-section">
+            <h2>Stunden eintragen</h2>
+            <div class="input-group">
+                <input type="number" step="0.25" id="hoursInput" placeholder="Heute erwartet: 8.75h">
+                <button class="add-btn" onclick="addEntry()">Hinzufügen</button>
+            </div>
+        </div>
+
+        <!-- Einträge -->
+        <div class="card entries-section">
+            <h2>Letzte Einträge</h2>
+            <div class="entries-list" id="entriesList">
+                <div class="empty-state">Noch keine Einträge</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let entries = [];
+        let regularHours = { 1: 8.75, 2: 8.75, 3: 8.75, 4: 8.75, 5: 4.5 };
+        let lastDeletedEntry = null;
+
+        // Storage keys
+        const ENTRIES_KEY = 'arbeitszeit-entries-v2';
+        const SETTINGS_KEY = 'arbeitszeit-settings';
+
+        function loadData() {
+            try {
+                const entriesRaw = localStorage.getItem(ENTRIES_KEY);
+                if (entriesRaw) entries = JSON.parse(entriesRaw);
+
+                const settingsRaw = localStorage.getItem(SETTINGS_KEY);
+                if (settingsRaw) {
+                    regularHours = JSON.parse(settingsRaw);
+                    document.getElementById('hoursMonday').value = regularHours[1];
+                    document.getElementById('hoursTuesday').value = regularHours[2];
+                    document.getElementById('hoursWednesday').value = regularHours[3];
+                    document.getElementById('hoursThursday').value = regularHours[4];
+                    document.getElementById('hoursFriday').value = regularHours[5];
+                }
+            } catch (error) {
+                console.error('Fehler beim Laden der Daten:', error);
+            }
+            updateUI();
+        }
+
+        function saveEntries() {
+            try {
+                localStorage.setItem(ENTRIES_KEY, JSON.stringify(entries));
+            } catch (error) {
+                console.error('Fehler beim Speichern der Einträge:', error);
+            }
+        }
+
+        function saveSettings() {
+            try {
+                localStorage.setItem(SETTINGS_KEY, JSON.stringify(regularHours));
+            } catch (error) {
+                console.error('Fehler beim Speichern der Einstellungen:', error);
+            }
+        }
+
+        function toggleSettings() {
+            const panel = document.getElementById('settingsPanel');
+            panel.classList.toggle('active');
+        }
+
+        function onSaveSettings() {
+            regularHours = {
+                1: parseFloat(document.getElementById('hoursMonday').value) || 0,
+                2: parseFloat(document.getElementById('hoursTuesday').value) || 0,
+                3: parseFloat(document.getElementById('hoursWednesday').value) || 0,
+                4: parseFloat(document.getElementById('hoursThursday').value) || 0,
+                5: parseFloat(document.getElementById('hoursFriday').value) || 0
+            };
+            saveSettings();
+            toggleSettings();
+            updateUI();
+        }
+
+        function addEntry() {
+            const input = document.getElementById('hoursInput');
+            const hours = parseFloat(input.value);
+            if (!hours && hours !== 0) return;
+
+            const today = new Date();
+            const dateStr = today.toISOString().split('T')[0];
+            const dayOfWeek = today.getDay();
+
+            const workedHours = hours;
+            const expectedHours = regularHours[dayOfWeek] || 0;
+            const difference = workedHours - expectedHours;
+
+            const newEntry = {
+                id: Date.now(),
+                date: dateStr,
+                workedHours,
+                expectedHours,
+                difference,
+                dayOfWeek
+            };
+
+            entries.push(newEntry);
+            entries.sort((a, b) => new Date(b.date) - new Date(a.date));
+            saveEntries();
+            updateUI();
+            input.value = '';
+        }
+
+        function deleteEntry(id) {
+            const idx = entries.findIndex(e => e.id === id);
+            if (idx === -1) return;
+            lastDeletedEntry = entries[idx];
+            entries.splice(idx, 1);
+            saveEntries();
+            updateUI();
+            showUndo();
+        }
+
+        function showUndo() {
+            const list = document.getElementById('entriesList');
+            const undoEl = document.createElement('div');
+            undoEl.className = 'entry-item';
+            undoEl.innerHTML = `
+                <div class="entry-info"><div class="entry-date">Löschung</div><div class="entry-details">Eintrag gelöscht</div></div>
+                <div class="entry-right"><button class="add-btn" id="undoBtn">Rückgängig</button></div>
+            `;
+            list.insertBefore(undoEl, list.firstChild);
+            document.getElementById('undoBtn').onclick = () => {
+                if (lastDeletedEntry) {
+                    entries.push(lastDeletedEntry);
+                    entries.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    saveEntries();
+                    lastDeletedEntry = null;
+                    updateUI();
+                }
+            };
+            setTimeout(() => {
+                if (lastDeletedEntry) {
+                    lastDeletedEntry = null;
+                    updateUI();
+                }
+            }, 8000);
+        }
+
+        function editEntry(id) {
+            const idx = entries.findIndex(e => e.id === id);
+            if (idx === -1) return;
+            const entry = entries[idx];
+            const newHoursRaw = prompt('Stunden bearbeiten (z.B. 8.5):', entry.workedHours);
+            if (newHoursRaw === null) return; // cancelled
+            const newHours = parseFloat(newHoursRaw);
+            if (isNaN(newHours)) return alert('Ungültige Zahl');
+            entry.workedHours = newHours;
+            entry.expectedHours = regularHours[entry.dayOfWeek] || 0;
+            entry.difference = entry.workedHours - entry.expectedHours;
+            entries[idx] = entry;
+            saveEntries();
+            updateUI();
+        }
+
+        function clearAll() {
+            if (!confirm('Alle Einträge wirklich löschen?')) return;
+            entries = [];
+            saveEntries();
+            updateUI();
+        }
+
+        function exportJSON() {
+            const data = { entries, settings: regularHours };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `arbeitszeit-export-${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        function importJSON(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.entries) entries = data.entries;
+                    if (data.settings) {
+                        regularHours = data.settings;
+                        document.getElementById('hoursMonday').value = regularHours[1];
+                        document.getElementById('hoursTuesday').value = regularHours[2];
+                        document.getElementById('hoursWednesday').value = regularHours[3];
+                        document.getElementById('hoursThursday').value = regularHours[4];
+                        document.getElementById('hoursFriday').value = regularHours[5];
+                        saveSettings();
+                    }
+                    saveEntries();
+                    updateUI();
+                    alert('Import erfolgreich');
+                } catch (err) {
+                    alert('Fehler beim Import: Ungültige Datei');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function updateUI() {
+            const today = new Date();
+            document.getElementById('currentDate').textContent = today.toLocaleDateString('de-DE', {
+                weekday: 'long',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+
+            const dayOfWeek = today.getDay();
+            const expectedToday = regularHours[dayOfWeek] || 0;
+            document.getElementById('hoursInput').placeholder = `Heute erwartet: ${expectedToday}h`;
+
+            updateStats();
+            updateEntriesList();
+        }
+
+        function updateStats() {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth();
+            const currentWeekStart = new Date(now);
+            currentWeekStart.setDate(now.getDate() - now.getDay() + 1);
+
+            let total = 0, yearTotal = 0, monthTotal = 0, weekTotal = 0;
+
+            entries.forEach(entry => {
+                const entryDate = new Date(entry.date);
+                total += entry.difference;
+
+                if (entryDate.getFullYear() === currentYear) {
+                    yearTotal += entry.difference;
+                    if (entryDate.getMonth() === currentMonth) {
+                        monthTotal += entry.difference;
+                        if (entryDate >= currentWeekStart) {
+                            weekTotal += entry.difference;
+                        }
+                    }
+                }
+            });
+
+            updateStatElement('weekStat', weekTotal);
+            updateStatElement('monthStat', monthTotal);
+            updateStatElement('yearStat', yearTotal);
+            updateStatElement('totalStat', total);
+        }
+
+        function updateStatElement(id, value) {
+            const el = document.getElementById(id);
+            el.textContent = (value >= 0 ? '+' : '') + value.toFixed(2) + 'h';
+            el.className = 'stat-value ' + (value >= 0 ? 'positive' : 'negative');
+        }
+
+        function updateEntriesList() {
+            const list = document.getElementById('entriesList');
+
+            if (!entries || entries.length === 0) {
+                list.innerHTML = '<div class="empty-state">Noch keine Einträge</div>';
+                return;
+            }
+
+            list.innerHTML = entries.slice(0, 100).map(entry => `
+                <div class="entry-item">
+                    <div class="entry-info">
+                        <div class="entry-date">${new Date(entry.date).toLocaleDateString('de-DE', {
+                            weekday: 'short',
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                        })}</div>
+                        <div class="entry-details">${entry.workedHours}h gearbeitet · ${entry.expectedHours}h erwartet</div>
+                    </div>
+                    <div class="entry-right">
+                        <div class="entry-value ${entry.difference >= 0 ? 'positive' : 'negative'}">
+                            ${entry.difference >= 0 ? '+' : ''}${entry.difference.toFixed(2)}h
+                        </div>
+                        <button class="add-btn" onclick="editEntry(${entry.id})">✎</button>
+                        <button class="delete-btn" onclick="deleteEntry(${entry.id})">×</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // UI bindings
+        document.getElementById('hoursInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addEntry();
+        });
+
+        // add export/import/clear buttons into an actions area
+        (function addActions() {
+            const entriesCard = document.querySelector('.entries-section');
+            const actions = document.createElement('div');
+            actions.style.display = 'flex';
+            actions.style.gap = '0.5rem';
+            actions.style.marginBottom = '0.75rem';
+
+            const expBtn = document.createElement('button');
+            expBtn.className = 'add-btn';
+            expBtn.textContent = 'Export';
+            expBtn.onclick = exportJSON;
+
+            const impBtn = document.createElement('button');
+            impBtn.className = 'save-btn';
+            impBtn.textContent = 'Import';
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'application/json';
+            fileInput.style.display = 'none';
+            fileInput.onchange = (e) => {
+                const f = e.target.files[0];
+                if (f) importJSON(f);
+                fileInput.value = '';
+            };
+            impBtn.onclick = () => fileInput.click();
+
+            const clearBtn = document.createElement('button');
+            clearBtn.className = 'delete-btn';
+            clearBtn.textContent = 'Alle löschen';
+            clearBtn.onclick = clearAll;
+
+            actions.appendChild(expBtn);
+            actions.appendChild(impBtn);
+            actions.appendChild(clearBtn);
+            entriesCard.insertBefore(actions, entriesCard.querySelector('.entries-list'));
+            entriesCard.appendChild(fileInput);
+        })();
+
+        loadData();
+    </script>
+</body>
+</html>
