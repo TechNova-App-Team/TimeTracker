@@ -3,706 +3,673 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arbeitszeiterfassung</title>
+    <title>TimeTracker V2</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* --- CORE VISUALS --- */
+        :root {
+            --bg-deep: #050505;
+            --bg-card: rgba(20, 20, 25, 0.7);
+            --border: rgba(255, 255, 255, 0.1);
+            --primary: #a855f7; /* Lila */
+            --primary-glow: rgba(168, 85, 247, 0.6);
+            --accent: #d946ef; /* Pinkish */
+            --edit-mode: #f59e0b; /* Orange für Edit Mode */
+            --success: #10b981;
+            --danger: #ef4444;
+            --text-main: #ffffff;
+            --text-muted: #9ca3af;
+            --font-stack: 'Inter', system-ui, -apple-system, sans-serif;
         }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #000;
-            color: #fff;
+            font-family: var(--font-stack);
+            background-color: var(--bg-deep);
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(168, 85, 247, 0.15), transparent 40%),
+                radial-gradient(circle at 100% 100%, rgba(217, 70, 239, 0.1), transparent 40%);
+            color: var(--text-main);
             min-height: 100vh;
             padding: 2rem 1rem;
         }
 
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
+        .container { max-width: 1200px; margin: 0 auto; }
 
+        /* --- GLASS CARDS --- */
         .card {
-            background: #18181b;
-            border: 1px solid #27272a;
-            border-radius: 0.5rem;
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
+        
+        .card:hover { border-color: rgba(168, 85, 247, 0.3); }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .icon {
-            width: 1.75rem;
-            height: 1.75rem;
-            color: #a855f7;
-        }
-
-        h1 {
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-
-        .subtitle {
-            color: #71717a;
-            font-size: 0.875rem;
-            margin-top: 0.25rem;
-        }
-
-        .settings-btn {
-            background: #27272a;
-            border: none;
-            color: #71717a;
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .settings-btn:hover {
-            color: #a855f7;
-            background: #3f3f46;
-        }
-
-        .settings-panel {
-            display: none;
-            margin-top: 1rem;
-        }
-
-        .settings-panel.active {
-            display: block;
-        }
-
-        .settings-title {
-            font-size: 1.125rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-        }
-
-        .setting-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.75rem;
-        }
-
-        .setting-row label {
-            color: #a1a1aa;
-        }
-
-        .setting-row input {
-            width: 6rem;
-            padding: 0.5rem 0.75rem;
-            background: #27272a;
-            border: 1px solid #3f3f46;
-            border-radius: 0.5rem;
-            color: #fff;
-            font-size: 1rem;
-        }
-
-        .setting-row input:focus {
-            outline: none;
-            border-color: #a855f7;
-        }
-
-        .save-btn {
-            width: 100%;
-            padding: 0.75rem;
-            background: #9333ea;
-            color: #fff;
-            border: none;
-            border-radius: 0.5rem;
-            font-weight: 500;
-            cursor: pointer;
-            margin-top: 1rem;
-            transition: all 0.2s;
-        }
-
-        .save-btn:hover {
-            background: #7e22ce;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
+        /* --- HEADER --- */
+        .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .user-welcome { font-size: 0.9rem; color: var(--primary); letter-spacing: 1px; text-transform: uppercase; font-weight: 700; margin-bottom: 0.25rem; }
+        .main-title { font-size: 2.5rem; font-weight: 900; background: linear-gradient(to right, #fff, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -1px; }
+        
+        /* --- RADIAL CHARTS (THE VISUAL PART) --- */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
+        
         .stat-card {
-            background: #18181b;
-            border: 1px solid #27272a;
-            border-radius: 0.5rem;
-            padding: 1rem;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 2rem 1rem; position: relative;
         }
-
-        .stat-label {
-            color: #71717a;
-            font-size: 0.75rem;
-            margin-bottom: 0.25rem;
+        
+        /* SVG Circle Logic */
+        .progress-ring { position: relative; width: 120px; height: 120px; }
+        .progress-ring circle {
+            fill: transparent; stroke-width: 8; stroke-linecap: round;
+            transform: rotate(-90deg); transform-origin: 50% 50%;
         }
-
-        .stat-value {
-            font-size: 1.25rem;
-            font-weight: bold;
-        }
-
-        .stat-value.positive {
-            color: #a855f7;
-        }
-
-        .stat-value.negative {
-            color: #ef4444;
-        }
-
-        .input-section h2 {
-            font-size: 1.125rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 0.75rem;
-        }
-
-        .input-group input {
-            flex: 1;
-            padding: 0.75rem 1rem;
-            background: #27272a;
-            border: 1px solid #3f3f46;
-            border-radius: 0.5rem;
-            color: #fff;
-            font-size: 1.125rem;
-        }
-
-        .input-group input::placeholder {
-            color: #71717a;
-        }
-
-        .input-group input:focus {
-            outline: none;
-            border-color: #a855f7;
-        }
-
-        .add-btn {
-            padding: 0.75rem 2rem;
-            background: #9333ea;
-            color: #fff;
-            border: none;
-            border-radius: 0.5rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .add-btn:hover {
-            background: #7e22ce;
-        }
-
-        .entries-section h2 {
-            font-size: 1.125rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-        }
-
-        .entries-list {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .entry-item {
-            background: #27272a;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            margin-bottom: 0.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.2s;
-        }
-
-        .entry-item:hover {
-            background: #3f3f46;
-        }
-
-        .entry-info {
-            flex: 1;
-        }
-
-        .entry-date {
-            font-weight: 500;
-            margin-bottom: 0.25rem;
-        }
-
-        .entry-details {
-            color: #71717a;
-            font-size: 0.875rem;
-        }
-
-        .entry-right {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .entry-value {
-            font-size: 1.125rem;
-            font-weight: bold;
-        }
-
-        .entry-value.positive {
-            color: #a855f7;
-        }
-
-        .entry-value.negative {
-            color: #ef4444;
-        }
-
-        .delete-btn {
-            padding: 0.25rem 0.75rem;
-            background: #3f3f46;
-            color: #a1a1aa;
-            border: none;
-            border-radius: 0.375rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 1.25rem;
-        }
-
-        .delete-btn:hover {
-            background: #dc2626;
-            color: #fff;
-        }
-
-        .empty-state {
+        .ring-bg { stroke: rgba(255,255,255,0.05); }
+        .ring-val { stroke: var(--primary); stroke-dasharray: 326; stroke-dashoffset: 326; transition: stroke-dashoffset 1s ease-in-out; filter: drop-shadow(0 0 4px var(--primary)); }
+        
+        .ring-center {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             text-align: center;
-            color: #71717a;
-            padding: 3rem 0;
         }
+        .ring-number { font-size: 1.2rem; font-weight: 800; color: #fff; }
+        .ring-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; margin-top: 2px; }
+        
+        /* Clickable Edit Hint */
+        .stat-card.clickable { cursor: pointer; }
+        .stat-card.clickable:hover .ring-val { stroke: var(--accent); }
+        .edit-hint { position: absolute; top: 10px; right: 10px; opacity: 0; font-size: 0.8rem; color: var(--text-muted); transition: 0.2s; }
+        .stat-card:hover .edit-hint { opacity: 1; }
 
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        /* --- INPUT SECTION (EDITABLE) --- */
+        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 15px; }
+        
+        .neon-input, .neon-select {
+            background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: #fff;
+            padding: 12px; border-radius: 10px; width: 100%; font-size: 0.95rem; outline: none; transition: 0.3s;
         }
+        .neon-input:focus, .neon-select:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(168, 85, 247, 0.2); }
+        
+        /* Action Button */
+        .action-btn {
+            width: 100%; padding: 16px; border-radius: 12px; border: none; font-weight: 800; font-size: 1rem;
+            cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
+            background: var(--primary); color: white; box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
+        }
+        .action-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(168, 85, 247, 0.6); }
+        
+        /* Edit Mode State */
+        body.is-editing .action-btn { background: var(--edit-mode); box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4); }
+        body.is-editing .neon-input { border-color: var(--edit-mode); }
+        .cancel-edit { display: none; margin-top: 10px; background: transparent; border: 1px solid var(--border); color: var(--text-muted); width: 100%; padding: 8px; border-radius: 8px; cursor: pointer; }
+        body.is-editing .cancel-edit { display: block; }
+
+        /* --- VISUAL CHART (BARS) --- */
+        .chart-wrapper { height: 180px; display: flex; align-items: flex-end; gap: 8px; margin-top: 2rem; padding: 10px 0; border-bottom: 1px solid var(--border); }
+        .chart-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; position: relative; }
+        .chart-bar { 
+            width: 100%; background: #333; border-radius: 6px 6px 0 0; min-height: 4px; position: relative; transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(to top, rgba(168,85,247,0.2), var(--primary));
+        }
+        .chart-bar.type-urlaub { background: linear-gradient(to top, rgba(16, 185, 129, 0.2), var(--success)); }
+        .chart-bar.type-krank { background: linear-gradient(to top, rgba(239, 68, 68, 0.2), var(--danger)); }
+        
+        /* Hover Info */
+        .chart-bar:hover::after {
+            content: attr(data-val); position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
+            background: #fff; color: #000; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; white-space: nowrap; z-index: 10;
+        }
+        .chart-label { margin-top: 8px; font-size: 0.75rem; color: var(--text-muted); }
+
+        /* --- LIST (EDITABLE) --- */
+        .entry-list { max-height: 500px; overflow-y: auto; padding-right: 5px; }
+        .entry-card {
+            background: rgba(255,255,255,0.03); border-radius: 12px; padding: 1rem; margin-bottom: 0.75rem;
+            display: flex; justify-content: space-between; align-items: center; border: 1px solid transparent; transition: 0.2s;
+        }
+        .entry-card:hover { border-color: var(--border); background: rgba(255,255,255,0.05); }
+        
+        .entry-left { display: flex; flex-direction: column; gap: 4px; }
+        .entry-date { font-weight: 700; color: #fff; }
+        .entry-meta { font-size: 0.8rem; color: var(--text-muted); display: flex; gap: 8px; align-items: center; }
+        .tag { padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; }
+        .tag-work { background: rgba(168,85,247,0.2); color: var(--primary); }
+        .tag-vac { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .tag-sick { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+        .tag-period { background: rgba(245, 158, 11, 0.2); color: var(--edit-mode); }
+
+        .entry-right { display: flex; align-items: center; gap: 1rem; }
+        .diff-bubble { font-family: monospace; font-weight: bold; font-size: 1rem; }
+        .positive { color: var(--success); } 
+        .negative { color: var(--danger); }
+
+        .btn-icon { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 6px; border-radius: 6px; transition: 0.2s; }
+        .btn-icon:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .btn-edit:hover { color: var(--edit-mode); }
+        .btn-del:hover { color: var(--danger); }
+
+        /* --- SETTINGS OVERLAY --- */
+        .settings-panel { display: none; border-top: 1px solid var(--border); margin-top: 20px; padding-top: 20px; animation: slideIn 0.3s; }
+        .settings-panel.active { display: block; }
+        @keyframes slideIn { from {opacity: 0; transform: translateY(-10px);} to {opacity: 1; transform: translateY(0);} }
+
+        /* --- MODAL --- */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .modal.active { display: flex; }
+        .modal-content { background: #111; border: 1px solid var(--border); padding: 2rem; border-radius: 20px; width: 90%; max-width: 400px; }
+
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="card">
-            <div class="header">
-                <div class="header-left">
-                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 6 12 12 16 14"></polyline>
-                    </svg>
-                    <div>
-                        <h1>Arbeitszeiterfassung</h1>
-                        <p class="subtitle" id="currentDate"></p>
-                    </div>
-                </div>
-                <button class="settings-btn" onclick="toggleSettings()">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <path d="M12 1v6m0 6v6m9-9h-6m-6 0H3m15.4-5.6l-4.2 4.2m-4.2 4.2L5.6 18.4m12.8 0l-4.2-4.2m-4.2-4.2L5.6 5.6"></path>
-                    </svg>
-                </button>
+
+<div class="container">
+    
+    <div class="header-row">
+        <div>
+            <div class="user-welcome" id="userNameDisplay">Willkommen zurück</div>
+            <h1 class="main-title">Dashboard</h1>
+        </div>
+        <div style="text-align: right;">
+            <div style="font-size: 0.8rem; color: var(--text-muted);" id="currentDate"></div>
+            <button onclick="toggleSettings()" class="btn-icon" style="font-size:1.2rem; margin-top:5px;">⚙️</button>
+        </div>
+    </div>
+
+    <div class="card settings-panel" id="settingsPanel">
+        <h3>⚙️ Einstellungen</h3>
+        <div class="input-grid" style="grid-template-columns: 1fr 1fr;">
+            <div>
+                <label style="font-size:0.8rem; color:#888;">Dein Name</label>
+                <input type="text" id="settingName" class="neon-input" placeholder="Name">
             </div>
-            <div class="settings-panel" id="settingsPanel">
-                <h3 class="settings-title">Reguläre Arbeitszeiten</h3>
-                <div class="setting-row">
-                    <label>Montag</label>
-                    <input type="number" step="0.25" id="hoursMonday" value="8.75">
+            <div>
+                <label style="font-size:0.8rem; color:#888;">Wochenstunden (Info)</label>
+                <input type="number" class="neon-input" disabled value="40">
+            </div>
+        </div>
+        <h4 style="margin-top:1rem; margin-bottom:0.5rem; font-size:0.9rem;">Soll-Stunden pro Tag</h4>
+        <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:5px; margin-bottom:1rem;">
+            <input type="number" id="h1" class="neon-input" style="text-align:center">
+            <input type="number" id="h2" class="neon-input" style="text-align:center">
+            <input type="number" id="h3" class="neon-input" style="text-align:center">
+            <input type="number" id="h4" class="neon-input" style="text-align:center">
+            <input type="number" id="h5" class="neon-input" style="text-align:center">
+        </div>
+        <button onclick="saveSettings()" class="action-btn" style="background:#333; font-size:0.8rem; padding:10px;">Speichern</button>
+    </div>
+
+    <div class="stats-grid">
+        <div class="card stat-card clickable" onclick="openPeriodModal('week')">
+            <div class="edit-hint">EDIT</div>
+            <div class="progress-ring">
+                <svg width="120" height="120">
+                    <circle class="ring-bg" stroke="white" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"/>
+                    <circle id="ringWeek" class="ring-val" stroke="white" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"/>
+                </svg>
+                <div class="ring-center">
+                    <div class="ring-number" id="valWeek">0</div>
+                    <div class="ring-label">Woche</div>
                 </div>
-                <div class="setting-row">
-                    <label>Dienstag</label>
-                    <input type="number" step="0.25" id="hoursTuesday" value="8.75">
+            </div>
+        </div>
+        
+        <div class="card stat-card clickable" onclick="openPeriodModal('month')">
+            <div class="edit-hint">EDIT</div>
+            <div class="progress-ring">
+                <svg width="120" height="120">
+                    <circle class="ring-bg" stroke="white" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"/>
+                    <circle id="ringMonth" class="ring-val" stroke="white" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"/>
+                </svg>
+                <div class="ring-center">
+                    <div class="ring-number" id="valMonth">0</div>
+                    <div class="ring-label">Monat</div>
                 </div>
-                <div class="setting-row">
-                    <label>Mittwoch</label>
-                    <input type="number" step="0.25" id="hoursWednesday" value="8.75">
-                </div>
-                <div class="setting-row">
-                    <label>Donnerstag</label>
-                    <input type="number" step="0.25" id="hoursThursday" value="8.75">
-                </div>
-                <div class="setting-row">
-                    <label>Freitag</label>
-                    <input type="number" step="0.25" id="hoursFriday" value="4.5">
-                </div>
-                <button class="save-btn" onclick="saveSettings()">Speichern</button>
             </div>
         </div>
 
-        <!-- Statistiken -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">WOCHE</div>
-                <div class="stat-value" id="weekStat">+0.00h</div>
+        <div class="card stat-card" style="align-items:flex-start; justify-content:space-between;">
+            <div>
+                <div class="ring-label" style="font-size:0.9rem; margin-bottom:5px;">SALDO GESAMT</div>
+                <div class="ring-number" id="valTotal" style="font-size:2.5rem;">+0.00h</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">MONAT</div>
-                <div class="stat-value" id="monthStat">+0.00h</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">JAHR</div>
-                <div class="stat-value" id="yearStat">+0.00h</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">GESAMT</div>
-                <div class="stat-value" id="totalStat">+0.00h</div>
-            </div>
-        </div>
-
-        <!-- Eingabe -->
-        <div class="card input-section">
-            <h2>Stunden eintragen</h2>
-            <div class="input-group">
-                <input type="number" step="0.25" id="hoursInput" placeholder="Heute erwartet: 8.75h">
-                <button class="add-btn" onclick="addEntry()">Hinzufügen</button>
-            </div>
-        </div>
-
-        <!-- Einträge -->
-        <div class="card entries-section">
-            <h2>Letzte Einträge</h2>
-            <div class="entries-list" id="entriesList">
-                <div class="empty-state">Noch keine Einträge</div>
+            <div style="width:100%; margin-top:auto;">
+                <div style="font-size:0.7rem; color:#888; margin-bottom:5px; display:flex; justify-content:space-between;">
+                    <span>Jahres-Fortschritt</span>
+                    <span id="yearProgressTxt">0%</span>
+                </div>
+                <div style="height:4px; background:#333; border-radius:2px; width:100%;">
+                    <div id="yearProgressBar" style="height:100%; background:var(--primary); width:0%; border-radius:2px; box-shadow:0 0 10px var(--primary);"></div>
+                </div>
             </div>
         </div>
     </div>
 
-    <script>
-        let entries = [];
-        let regularHours = { 1: 8.75, 2: 8.75, 3: 8.75, 4: 8.75, 5: 4.5 };
-        let lastDeletedEntry = null;
+    <div class="card">
+        <h3 style="margin-bottom:1rem;">Eintrag erfassen / bearbeiten</h3>
+        
+        <div class="input-grid" style="grid-template-columns: 1.5fr 1fr 1fr 1fr;">
+            <input type="date" id="inpDate" class="neon-input">
+            <select id="inpType" class="neon-select" onchange="toggleTimeInputs()">
+                <option value="work">💼 Arbeit</option>
+                <option value="vacation">🌴 Urlaub</option>
+                <option value="sick">💊 Krank</option>
+                <option value="holiday">🎉 Feiertag</option>
+            </select>
+            <input type="time" id="inpStart" class="neon-input" placeholder="Start">
+            <input type="time" id="inpEnd" class="neon-input" placeholder="Ende">
+        </div>
+        
+        <div class="input-grid" style="grid-template-columns: 1fr;">
+            <input type="number" id="inpHours" class="neon-input" step="0.25" placeholder="Oder Stunden direkt eingeben (z.B. 8.25)">
+        </div>
 
-        // Storage keys
-        const ENTRIES_KEY = 'arbeitszeit-entries-v2';
-        const SETTINGS_KEY = 'arbeitszeit-settings';
+        <button id="mainBtn" onclick="handleEntry()" class="action-btn">Eintrag hinzufügen</button>
+        <button onclick="resetEditMode()" class="cancel-edit">Bearbeiten abbrechen</button>
+        
+        <div class="chart-wrapper" id="weeklyChart">
+            </div>
+    </div>
 
-        function loadData() {
-            try {
-                const entriesRaw = localStorage.getItem(ENTRIES_KEY);
-                if (entriesRaw) entries = JSON.parse(entriesRaw);
+    <div class="card">
+        <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
+            <h3>Verlauf</h3>
+            <div>
+                <button class="btn-icon" onclick="exportData()">💾 Backup</button>
+                <button class="btn-icon" onclick="document.getElementById('fileImp').click()">📂 Import</button>
+                <input type="file" id="fileImp" style="display:none" onchange="importData(event)">
+            </div>
+        </div>
+        <div class="entry-list" id="entryList">
+            </div>
+    </div>
 
-                const settingsRaw = localStorage.getItem(SETTINGS_KEY);
-                if (settingsRaw) {
-                    regularHours = JSON.parse(settingsRaw);
-                    document.getElementById('hoursMonday').value = regularHours[1];
-                    document.getElementById('hoursTuesday').value = regularHours[2];
-                    document.getElementById('hoursWednesday').value = regularHours[3];
-                    document.getElementById('hoursThursday').value = regularHours[4];
-                    document.getElementById('hoursFriday').value = regularHours[5];
-                }
-            } catch (error) {
-                console.error('Fehler beim Laden der Daten:', error);
+</div>
+
+<div class="modal" id="periodModal">
+    <div class="modal-content">
+        <h3 style="margin-bottom:1rem;">Korrektur buchen</h3>
+        <select id="pSelect" class="neon-select" style="margin-bottom:10px;"></select>
+        <input type="number" id="pVal" class="neon-input" placeholder="Differenz (+/-)" step="0.1" style="margin-bottom:15px;">
+        <button onclick="savePeriod()" class="action-btn">Speichern</button>
+        <button onclick="document.getElementById('periodModal').classList.remove('active')" class="cancel-edit" style="display:block; margin-top:10px;">Abbrechen</button>
+    </div>
+</div>
+
+<script>
+    // --- STATE ---
+    let entries = [];
+    let settings = {
+        name: 'User',
+        hours: { 1: 8.75, 2: 8.75, 3: 8.75, 4: 8.75, 5: 4.5 }
+    };
+    let editingId = null; // ID of entry currently being edited
+
+    // --- INIT ---
+    window.onload = () => {
+        loadData();
+        updateUI();
+        setInterval(updateClock, 1000);
+        document.getElementById('inpDate').valueAsDate = new Date();
+    };
+
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('currentDate').textContent = now.toLocaleString('de-DE', { weekday:'long', day:'2-digit', month:'long', hour:'2-digit', minute:'2-digit' });
+    }
+
+    // --- DATA HANDLING ---
+    function loadData() {
+        const d = localStorage.getItem('tt_god_data');
+        if(d) entries = JSON.parse(d);
+        const s = localStorage.getItem('tt_god_settings');
+        if(s) settings = JSON.parse(s);
+        
+        // Settings fill
+        document.getElementById('settingName').value = settings.name;
+        document.getElementById('userNameDisplay').textContent = `Willkommen, ${settings.name}`;
+        for(let i=1; i<=5; i++) document.getElementById(`h${i}`).value = settings.hours[i];
+    }
+
+    function saveData() {
+        localStorage.setItem('tt_god_data', JSON.stringify(entries));
+        localStorage.setItem('tt_god_settings', JSON.stringify(settings));
+    }
+
+    // --- LOGIC: ADD / UPDATE ---
+    function handleEntry() {
+        const date = document.getElementById('inpDate').value;
+        const type = document.getElementById('inpType').value;
+        const start = document.getElementById('inpStart').value;
+        const end = document.getElementById('inpEnd').value;
+        const direct = document.getElementById('inpHours').value;
+
+        if(!date) return alert('Datum fehlt!');
+
+        let worked = 0;
+        let dayOfWeek = new Date(date).getDay();
+        let expected = settings.hours[dayOfWeek] || 0;
+
+        // Logic for Types
+        if (type === 'work') {
+            if (start && end) {
+                let d1 = new Date(`2000-01-01T${start}`);
+                let d2 = new Date(`2000-01-01T${end}`);
+                worked = (d2 - d1) / 36e5;
+                if(worked < 0) worked += 24;
+            } else if (direct) {
+                worked = parseFloat(direct);
+            } else {
+                return alert('Bitte Zeit oder Stunden eingeben!');
             }
+        } else {
+            // Urlaub/Krank/Feiertag: Worked = Expected (Diff 0)
+            // Or simple 0 if it's weekend? Let's assume standard day logic.
+            worked = expected; 
+            // Optional: User could override hours for half-days vacation?
+            if(direct) worked = parseFloat(direct);
+        }
+
+        const entry = {
+            id: editingId || Date.now(), // Use existing ID if editing
+            date: date,
+            type: type,
+            start: type === 'work' ? start : '',
+            end: type === 'work' ? end : '',
+            worked: worked,
+            expected: expected,
+            diff: worked - expected,
+            isPeriod: false
+        };
+
+        if (editingId) {
+            // Update existing
+            const idx = entries.findIndex(e => e.id === editingId);
+            if(idx !== -1) entries[idx] = entry;
+            resetEditMode();
+        } else {
+            // Add new
+            entries.push(entry);
+        }
+
+        entries.sort((a,b) => new Date(b.date) - new Date(a.date));
+        saveData();
+        updateUI();
+        
+        // Clear Inputs (but keep Date)
+        document.getElementById('inpStart').value = '';
+        document.getElementById('inpEnd').value = '';
+        document.getElementById('inpHours').value = '';
+    }
+
+    // --- EDIT MODE LOGIC ---
+    function editEntry(id) {
+        const e = entries.find(x => x.id === id);
+        if(!e) return;
+        
+        editingId = id;
+        document.body.classList.add('is-editing');
+        
+        // Fill inputs
+        document.getElementById('inpDate').value = e.date;
+        document.getElementById('inpType').value = e.type || 'work';
+        document.getElementById('inpStart').value = e.start || '';
+        document.getElementById('inpEnd').value = e.end || '';
+        document.getElementById('inpHours').value = e.worked;
+        
+        // Visual updates
+        document.getElementById('mainBtn').textContent = "Eintrag aktualisieren";
+        toggleTimeInputs();
+        
+        // Scroll top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetEditMode() {
+        editingId = null;
+        document.body.classList.remove('is-editing');
+        document.getElementById('mainBtn').textContent = "Eintrag hinzufügen";
+        document.getElementById('inpStart').value = '';
+        document.getElementById('inpEnd').value = '';
+        document.getElementById('inpHours').value = '';
+        document.getElementById('inpType').value = 'work';
+        toggleTimeInputs();
+    }
+
+    function deleteEntry(id) {
+        if(confirm('Wirklich löschen?')) {
+            entries = entries.filter(e => e.id !== id);
+            if(editingId === id) resetEditMode();
+            saveData();
             updateUI();
         }
+    }
 
-        function saveEntries() {
-            try {
-                localStorage.setItem(ENTRIES_KEY, JSON.stringify(entries));
-            } catch (error) {
-                console.error('Fehler beim Speichern der Einträge:', error);
-            }
+    function toggleTimeInputs() {
+        const t = document.getElementById('inpType').value;
+        const disable = t !== 'work';
+        document.getElementById('inpStart').disabled = disable;
+        document.getElementById('inpEnd').disabled = disable;
+        if(disable) {
+            document.getElementById('inpStart').style.opacity = 0.5;
+            document.getElementById('inpEnd').style.opacity = 0.5;
+        } else {
+            document.getElementById('inpStart').style.opacity = 1;
+            document.getElementById('inpEnd').style.opacity = 1;
         }
+    }
 
-        function saveSettings() {
-            try {
-                localStorage.setItem(SETTINGS_KEY, JSON.stringify(regularHours));
-            } catch (error) {
-                console.error('Fehler beim Speichern der Einstellungen:', error);
-            }
-        }
+    // --- VISUALS & RENDERING ---
+    function updateUI() {
+        renderStats();
+        renderChart();
+        renderList();
+    }
 
-        function toggleSettings() {
-            const panel = document.getElementById('settingsPanel');
-            panel.classList.toggle('active');
-        }
+    function renderStats() {
+        const now = new Date();
+        const curKW = getKW(now);
+        
+        let diffW=0, diffM=0, diffTot=0;
+        let workW=0, expW=0, workM=0, expM=0;
 
-        function onSaveSettings() {
-            regularHours = {
-                1: parseFloat(document.getElementById('hoursMonday').value) || 0,
-                2: parseFloat(document.getElementById('hoursTuesday').value) || 0,
-                3: parseFloat(document.getElementById('hoursWednesday').value) || 0,
-                4: parseFloat(document.getElementById('hoursThursday').value) || 0,
-                5: parseFloat(document.getElementById('hoursFriday').value) || 0
-            };
-            saveSettings();
-            toggleSettings();
-            updateUI();
-        }
-
-        function addEntry() {
-            const input = document.getElementById('hoursInput');
-            const hours = parseFloat(input.value);
-            if (!hours && hours !== 0) return;
-
-            const today = new Date();
-            const dateStr = today.toISOString().split('T')[0];
-            const dayOfWeek = today.getDay();
-
-            const workedHours = hours;
-            const expectedHours = regularHours[dayOfWeek] || 0;
-            const difference = workedHours - expectedHours;
-
-            const newEntry = {
-                id: Date.now(),
-                date: dateStr,
-                workedHours,
-                expectedHours,
-                difference,
-                dayOfWeek
-            };
-
-            entries.push(newEntry);
-            entries.sort((a, b) => new Date(b.date) - new Date(a.date));
-            saveEntries();
-            updateUI();
-            input.value = '';
-        }
-
-        function deleteEntry(id) {
-            const idx = entries.findIndex(e => e.id === id);
-            if (idx === -1) return;
-            lastDeletedEntry = entries[idx];
-            entries.splice(idx, 1);
-            saveEntries();
-            updateUI();
-            showUndo();
-        }
-
-        function showUndo() {
-            const list = document.getElementById('entriesList');
-            const undoEl = document.createElement('div');
-            undoEl.className = 'entry-item';
-            undoEl.innerHTML = `
-                <div class="entry-info"><div class="entry-date">Löschung</div><div class="entry-details">Eintrag gelöscht</div></div>
-                <div class="entry-right"><button class="add-btn" id="undoBtn">Rückgängig</button></div>
-            `;
-            list.insertBefore(undoEl, list.firstChild);
-            document.getElementById('undoBtn').onclick = () => {
-                if (lastDeletedEntry) {
-                    entries.push(lastDeletedEntry);
-                    entries.sort((a, b) => new Date(b.date) - new Date(a.date));
-                    saveEntries();
-                    lastDeletedEntry = null;
-                    updateUI();
-                }
-            };
-            setTimeout(() => {
-                if (lastDeletedEntry) {
-                    lastDeletedEntry = null;
-                    updateUI();
-                }
-            }, 8000);
-        }
-
-        function editEntry(id) {
-            const idx = entries.findIndex(e => e.id === id);
-            if (idx === -1) return;
-            const entry = entries[idx];
-            const newHoursRaw = prompt('Stunden bearbeiten (z.B. 8.5):', entry.workedHours);
-            if (newHoursRaw === null) return; // cancelled
-            const newHours = parseFloat(newHoursRaw);
-            if (isNaN(newHours)) return alert('Ungültige Zahl');
-            entry.workedHours = newHours;
-            entry.expectedHours = regularHours[entry.dayOfWeek] || 0;
-            entry.difference = entry.workedHours - entry.expectedHours;
-            entries[idx] = entry;
-            saveEntries();
-            updateUI();
-        }
-
-        function clearAll() {
-            if (!confirm('Alle Einträge wirklich löschen?')) return;
-            entries = [];
-            saveEntries();
-            updateUI();
-        }
-
-        function exportJSON() {
-            const data = { entries, settings: regularHours };
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `arbeitszeit-export-${new Date().toISOString().slice(0,10)}.json`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(url);
-        }
-
-        function importJSON(file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (data.entries) entries = data.entries;
-                    if (data.settings) {
-                        regularHours = data.settings;
-                        document.getElementById('hoursMonday').value = regularHours[1];
-                        document.getElementById('hoursTuesday').value = regularHours[2];
-                        document.getElementById('hoursWednesday').value = regularHours[3];
-                        document.getElementById('hoursThursday').value = regularHours[4];
-                        document.getElementById('hoursFriday').value = regularHours[5];
-                        saveSettings();
+        entries.forEach(e => {
+            diffTot += e.diff;
+            const d = new Date(e.date);
+            
+            // Year check
+            if(d.getFullYear() === now.getFullYear()) {
+                // Month check
+                if(d.getMonth() === now.getMonth()) {
+                    diffM += e.diff;
+                    workM += e.worked;
+                    expM += e.expected;
+                    
+                    // Week check
+                    if(getKW(d) === curKW) {
+                        diffW += e.diff;
+                        workW += e.worked;
+                        expW += e.expected;
                     }
-                    saveEntries();
-                    updateUI();
-                    alert('Import erfolgreich');
-                } catch (err) {
-                    alert('Fehler beim Import: Ungültige Datei');
                 }
-            };
-            reader.readAsText(file);
-        }
-
-        function updateUI() {
-            const today = new Date();
-            document.getElementById('currentDate').textContent = today.toLocaleDateString('de-DE', {
-                weekday: 'long',
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
-
-            const dayOfWeek = today.getDay();
-            const expectedToday = regularHours[dayOfWeek] || 0;
-            document.getElementById('hoursInput').placeholder = `Heute erwartet: ${expectedToday}h`;
-
-            updateStats();
-            updateEntriesList();
-        }
-
-        function updateStats() {
-            const now = new Date();
-            const currentYear = now.getFullYear();
-            const currentMonth = now.getMonth();
-            const currentWeekStart = new Date(now);
-            currentWeekStart.setDate(now.getDate() - now.getDay() + 1);
-
-            let total = 0, yearTotal = 0, monthTotal = 0, weekTotal = 0;
-
-            entries.forEach(entry => {
-                const entryDate = new Date(entry.date);
-                total += entry.difference;
-
-                if (entryDate.getFullYear() === currentYear) {
-                    yearTotal += entry.difference;
-                    if (entryDate.getMonth() === currentMonth) {
-                        monthTotal += entry.difference;
-                        if (entryDate >= currentWeekStart) {
-                            weekTotal += entry.difference;
-                        }
-                    }
-                }
-            });
-
-            updateStatElement('weekStat', weekTotal);
-            updateStatElement('monthStat', monthTotal);
-            updateStatElement('yearStat', yearTotal);
-            updateStatElement('totalStat', total);
-        }
-
-        function updateStatElement(id, value) {
-            const el = document.getElementById(id);
-            el.textContent = (value >= 0 ? '+' : '') + value.toFixed(2) + 'h';
-            el.className = 'stat-value ' + (value >= 0 ? 'positive' : 'negative');
-        }
-
-        function updateEntriesList() {
-            const list = document.getElementById('entriesList');
-
-            if (!entries || entries.length === 0) {
-                list.innerHTML = '<div class="empty-state">Noch keine Einträge</div>';
-                return;
             }
-
-            list.innerHTML = entries.slice(0, 100).map(entry => `
-                <div class="entry-item">
-                    <div class="entry-info">
-                        <div class="entry-date">${new Date(entry.date).toLocaleDateString('de-DE', {
-                            weekday: 'short',
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric'
-                        })}</div>
-                        <div class="entry-details">${entry.workedHours}h gearbeitet · ${entry.expectedHours}h erwartet</div>
-                    </div>
-                    <div class="entry-right">
-                        <div class="entry-value ${entry.difference >= 0 ? 'positive' : 'negative'}">
-                            ${entry.difference >= 0 ? '+' : ''}${entry.difference.toFixed(2)}h
-                        </div>
-                        <button class="add-btn" onclick="editEntry(${entry.id})">✎</button>
-                        <button class="delete-btn" onclick="deleteEntry(${entry.id})">×</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // UI bindings
-        document.getElementById('hoursInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') addEntry();
         });
 
-        // add export/import/clear buttons into an actions area
-        (function addActions() {
-            const entriesCard = document.querySelector('.entries-section');
-            const actions = document.createElement('div');
-            actions.style.display = 'flex';
-            actions.style.gap = '0.5rem';
-            actions.style.marginBottom = '0.75rem';
+        // Update Rings (Visuals)
+        updateRing('ringWeek', 'valWeek', workW, expW, diffW);
+        updateRing('ringMonth', 'valMonth', workM, expM, diffM);
+        
+        // Update Total
+        const totEl = document.getElementById('valTotal');
+        totEl.textContent = (diffTot >= 0 ? '+' : '') + diffTot.toFixed(2) + 'h';
+        totEl.style.color = diffTot >= 0 ? 'var(--success)' : 'var(--danger)';
 
-            const expBtn = document.createElement('button');
-            expBtn.className = 'add-btn';
-            expBtn.textContent = 'Export';
-            expBtn.onclick = exportJSON;
+        // Year Progress (Simple Day-of-Year calc)
+        const start = new Date(now.getFullYear(), 0, 0);
+        const diff = now - start;
+        const oneDay = 1000 * 60 * 60 * 24;
+        const dayOfYear = Math.floor(diff / oneDay);
+        const pct = (dayOfYear / 365) * 100;
+        document.getElementById('yearProgressBar').style.width = pct + '%';
+        document.getElementById('yearProgressTxt').textContent = Math.floor(pct) + '%';
+    }
 
-            const impBtn = document.createElement('button');
-            impBtn.className = 'save-btn';
-            impBtn.textContent = 'Import';
-            const fileInput = document.createElement('input');
-            fileInput.type = 'file';
-            fileInput.accept = 'application/json';
-            fileInput.style.display = 'none';
-            fileInput.onchange = (e) => {
-                const f = e.target.files[0];
-                if (f) importJSON(f);
-                fileInput.value = '';
-            };
-            impBtn.onclick = () => fileInput.click();
+    function updateRing(ringId, txtId, work, exp, diff) {
+        // Calculate Percentage of Target Reached
+        // Safe divide
+        const pct = exp > 0 ? (work / exp) * 100 : 0;
+        
+        // SVG Logic: Circumference = 2 * PI * r (r=52) ≈ 326.72
+        const circ = 326;
+        const offset = circ - (Math.min(pct, 100) / 100) * circ;
+        
+        const ring = document.getElementById(ringId);
+        ring.style.strokeDashoffset = offset;
+        
+        // Color logic: If diff < 0 (under target), yellow/orange? No, keep primary until 100%
+        ring.style.stroke = diff >= 0 ? 'var(--success)' : 'var(--primary)';
 
-            const clearBtn = document.createElement('button');
-            clearBtn.className = 'delete-btn';
-            clearBtn.textContent = 'Alle löschen';
-            clearBtn.onclick = clearAll;
+        const txt = document.getElementById(txtId);
+        txt.textContent = (diff >= 0 ? '+' : '') + diff.toFixed(1) + 'h';
+        txt.style.color = diff >= 0 ? 'var(--success)' : '#fff';
+    }
 
-            actions.appendChild(expBtn);
-            actions.appendChild(impBtn);
-            actions.appendChild(clearBtn);
-            entriesCard.insertBefore(actions, entriesCard.querySelector('.entries-list'));
-            entriesCard.appendChild(fileInput);
-        })();
+    function renderChart() {
+        const wrap = document.getElementById('weeklyChart');
+        wrap.innerHTML = '';
+        
+        // Last 7 days
+        for(let i=6; i>=0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            const iso = d.toISOString().split('T')[0];
+            
+            // Find entries for this day
+            const daysEntries = entries.filter(e => e.date === iso && !e.isPeriod);
+            const totalWork = daysEntries.reduce((sum, e) => sum + e.worked, 0);
+            
+            // Determine type for color (prioritize vacation/sick)
+            let typeClass = '';
+            if(daysEntries.some(e => e.type === 'sick')) typeClass = 'type-krank';
+            else if(daysEntries.some(e => e.type === 'vacation')) typeClass = 'type-urlaub';
 
-        loadData();
-    </script>
+            // Scale max 10h
+            const h = Math.min((totalWork / 10) * 100, 100);
+            
+            const col = document.createElement('div');
+            col.className = 'chart-col';
+            col.innerHTML = `
+                <div class="chart-bar ${typeClass}" style="height:${h}%" data-val="${totalWork.toFixed(2)}h"></div>
+                <div class="chart-label">${d.toLocaleDateString('de-DE',{weekday:'short'})}</div>
+            `;
+            wrap.appendChild(col);
+        }
+    }
+
+    function renderList() {
+        const list = document.getElementById('entryList');
+        list.innerHTML = '';
+        
+        entries.forEach(e => {
+            let badge = '';
+            if(e.isPeriod) badge = `<span class="tag tag-period">${e.label}</span>`;
+            else if(e.type === 'vacation') badge = `<span class="tag tag-vac">Urlaub</span>`;
+            else if(e.type === 'sick') badge = `<span class="tag tag-sick">Krank</span>`;
+            else badge = `<span class="tag tag-work">Arbeit</span>`;
+
+            const timeStr = e.start ? `${e.start} - ${e.end}` : `${e.worked.toFixed(2)}h Pauschal`;
+
+            const div = document.createElement('div');
+            div.className = 'entry-card';
+            div.innerHTML = `
+                <div class="entry-left">
+                    <div class="entry-date">${new Date(e.date).toLocaleDateString('de-DE')} ${e.isPeriod ? '' : badge}</div>
+                    <div class="entry-meta">${timeStr}</div>
+                </div>
+                <div class="entry-right">
+                    <div class="diff-bubble ${e.diff>=0?'positive':'negative'}">${e.diff>=0?'+':''}${e.diff.toFixed(2)}</div>
+                    <button class="btn-icon btn-edit" onclick="editEntry(${e.id})">✎</button>
+                    <button class="btn-icon btn-del" onclick="deleteEntry(${e.id})">×</button>
+                </div>
+            `;
+            list.appendChild(div);
+        });
+    }
+
+    // --- UTILS & SETTINGS ---
+    function toggleSettings() { document.getElementById('settingsPanel').classList.toggle('active'); }
+    function saveSettings() {
+        settings.name = document.getElementById('settingName').value;
+        for(let i=1; i<=5; i++) settings.hours[i] = parseFloat(document.getElementById(`h${i}`).value)||0;
+        saveData(); updateUI(); toggleSettings();
+    }
+    function getKW(d) {
+        d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+        var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+        return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+    }
+
+    // --- PERIOD MODAL ---
+    let curP = '';
+    function openPeriodModal(t) {
+        curP = t;
+        const s = document.getElementById('pSelect'); s.innerHTML='';
+        const now = new Date();
+        document.getElementById('periodModal').classList.add('active');
+        
+        if(t === 'week') {
+            for(let i=0; i<52; i++) {
+                let d = new Date(now); d.setDate(d.getDate()-i*7);
+                let opt = document.createElement('option');
+                opt.text = `KW ${getKW(d)} ${d.getFullYear()}`;
+                s.add(opt);
+            }
+        } else {
+            const m = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+            for(let i=0; i<24; i++) {
+                let d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+                let opt = document.createElement('option');
+                opt.text = `${m[d.getMonth()]} ${d.getFullYear()}`;
+                s.add(opt);
+            }
+        }
+    }
+    function savePeriod() {
+        const val = parseFloat(document.getElementById('pVal').value);
+        if(isNaN(val)) return;
+        const sel = document.getElementById('pSelect');
+        const txt = sel.options[sel.selectedIndex].text;
+        
+        entries.push({
+            id: Date.now(),
+            date: new Date().toISOString().split('T')[0],
+            isPeriod: true,
+            label: txt,
+            diff: val,
+            worked: 0, expected: 0
+        });
+        saveData(); updateUI();
+        document.getElementById('periodModal').classList.remove('active');
+    }
+
+    // --- IMPORT / EXPORT ---
+    function exportData() {
+        const b = new Blob([JSON.stringify(entries)],{type:'application/json'});
+        const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download='backup.json'; a.click();
+    }
+    function importData(e) {
+        const r = new FileReader();
+        r.onload = ev => { 
+            try { entries=JSON.parse(ev.target.result); saveData(); updateUI(); } 
+            catch(err){alert('Fehler');} 
+        };
+        r.readAsText(e.target.files[0]);
+    }
+</script>
 </body>
 </html>
