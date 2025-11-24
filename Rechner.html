@@ -3,344 +3,419 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TimeTracker V2</title>
+    <title>TimeTracker GOD MODE V3</title>
     <style>
-        /* --- CORE VISUALS --- */
+        /* --- CORE VARIABLES --- */
         :root {
             --bg-deep: #050505;
-            --bg-card: rgba(20, 20, 25, 0.7);
-            --border: rgba(255, 255, 255, 0.1);
-            --primary: #a855f7; /* Lila */
-            --primary-glow: rgba(168, 85, 247, 0.6);
-            --accent: #d946ef; /* Pinkish */
-            --edit-mode: #f59e0b; /* Orange für Edit Mode */
+            --bg-glass: rgba(20, 20, 25, 0.6);
+            --sidebar-width: 260px;
+            --primary: #a855f7; /* Default Neon Purple */
+            --primary-dim: rgba(168, 85, 247, 0.15);
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
             --success: #10b981;
             --danger: #ef4444;
-            --text-main: #ffffff;
-            --text-muted: #9ca3af;
-            --font-stack: 'Inter', system-ui, -apple-system, sans-serif;
+            --warning: #f59e0b;
+            --border: rgba(255, 255, 255, 0.08);
+            --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: var(--font-stack);
+            font-family: var(--font-main);
             background-color: var(--bg-deep);
             background-image: 
-                radial-gradient(circle at 0% 0%, rgba(168, 85, 247, 0.15), transparent 40%),
-                radial-gradient(circle at 100% 100%, rgba(217, 70, 239, 0.1), transparent 40%);
+                radial-gradient(circle at 0% 0%, rgba(var(--primary-rgb), 0.15), transparent 50%),
+                radial-gradient(circle at 90% 90%, rgba(var(--primary-rgb), 0.1), transparent 50%);
             color: var(--text-main);
             min-height: 100vh;
-            padding: 2rem 1rem;
+            display: flex;
+            overflow-x: hidden;
         }
 
-        .container { max-width: 1200px; margin: 0 auto; }
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: rgba(10, 10, 12, 0.95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border);
+            height: 100vh;
+            position: fixed;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .brand {
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: -1px;
+            margin-bottom: 3rem;
+            background: linear-gradient(to right, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 15px;
+            margin-bottom: 5px;
+            border-radius: 12px;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: var(--primary-dim);
+            color: var(--primary);
+        }
+
+        .nav-item.active { box-shadow: 0 0 15px var(--primary-dim); border: 1px solid rgba(255,255,255,0.05); }
+
+        .nav-section {
+            font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px;
+            color: var(--text-muted); margin-top: 2rem; margin-bottom: 1rem; opacity: 0.7;
+        }
+
+        /* --- MAIN CONTENT --- */
+        .main {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 2.5rem;
+            width: calc(100% - var(--sidebar-width));
+        }
 
         /* --- GLASS CARDS --- */
         .card {
-            background: var(--bg-card);
+            background: var(--bg-glass);
             backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--border);
-            border-radius: 20px;
+            border-radius: 24px;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s;
         }
-        
-        .card:hover { border-color: rgba(168, 85, 247, 0.3); }
+        .card:hover { border-color: var(--primary); }
 
         /* --- HEADER --- */
-        .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-        .user-welcome { font-size: 0.9rem; color: var(--primary); letter-spacing: 1px; text-transform: uppercase; font-weight: 700; margin-bottom: 0.25rem; }
-        .main-title { font-size: 2.5rem; font-weight: 900; background: linear-gradient(to right, #fff, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -1px; }
+        .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; }
+        .greeting { font-size: 0.9rem; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .page-title { font-size: 2.5rem; font-weight: 800; line-height: 1.1; }
+        .date-badge { background: var(--bg-glass); padding: 8px 16px; border-radius: 50px; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted); }
+
+        /* --- KPI GRID (RADIALS) --- */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
         
-        /* --- RADIAL CHARTS (THE VISUAL PART) --- */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
-        
-        .stat-card {
+        .kpi-card {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 2rem 1rem; position: relative;
+            padding: 2rem 1rem; cursor: pointer;
         }
-        
-        /* SVG Circle Logic */
-        .progress-ring { position: relative; width: 120px; height: 120px; }
+        .kpi-card:hover .ring-val { stroke: #fff; filter: drop-shadow(0 0 8px #fff); }
+
+        /* SVG RINGS */
+        .progress-ring { position: relative; width: 100px; height: 100px; }
         .progress-ring circle {
             fill: transparent; stroke-width: 8; stroke-linecap: round;
             transform: rotate(-90deg); transform-origin: 50% 50%;
         }
         .ring-bg { stroke: rgba(255,255,255,0.05); }
-        .ring-val { stroke: var(--primary); stroke-dasharray: 326; stroke-dashoffset: 326; transition: stroke-dashoffset 1s ease-in-out; filter: drop-shadow(0 0 4px var(--primary)); }
+        .ring-val { stroke: var(--primary); transition: stroke-dashoffset 1s ease; filter: drop-shadow(0 0 10px var(--primary)); }
         
-        .ring-center {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            text-align: center;
+        .ring-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+        .ring-num { font-size: 1.1rem; font-weight: 800; color: #fff; }
+        .ring-lbl { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-top: 2px; }
+
+        /* --- CHARTS SECTION --- */
+        .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+        
+        /* Trend Chart (SVG) */
+        .trend-container { height: 200px; width: 100%; position: relative; }
+        .trend-svg { width: 100%; height: 100%; overflow: visible; }
+        .trend-line { fill: none; stroke: var(--primary); stroke-width: 3; stroke-linecap: round; filter: drop-shadow(0 0 10px var(--primary)); }
+        .trend-area { fill: var(--primary); opacity: 0.1; }
+        .trend-grid { stroke: rgba(255,255,255,0.05); stroke-width: 1; }
+
+        /* Donut Chart */
+        .donut-container { display: flex; align-items: center; justify-content: center; height: 200px; position: relative; }
+        .donut-legend { margin-top: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.8rem; }
+        .legend-item { display: flex; align-items: center; color: var(--text-muted); }
+        .dot { width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; }
+
+        /* --- INPUTS --- */
+        .input-wrapper { display: grid; grid-template-columns: 1fr 1.5fr; gap: 2rem; }
+        .input-group { display: flex; flex-direction: column; gap: 1rem; }
+        
+        .glass-input, .glass-select {
+            background: rgba(0,0,0,0.2); border: 1px solid var(--border);
+            padding: 14px; border-radius: 12px; color: #fff; font-size: 1rem; width: 100%; outline: none; transition: 0.3s;
         }
-        .ring-number { font-size: 1.2rem; font-weight: 800; color: #fff; }
-        .ring-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; margin-top: 2px; }
+        .glass-input:focus { border-color: var(--primary); box-shadow: 0 0 15px var(--primary-dim); }
         
-        /* Clickable Edit Hint */
-        .stat-card.clickable { cursor: pointer; }
-        .stat-card.clickable:hover .ring-val { stroke: var(--accent); }
-        .edit-hint { position: absolute; top: 10px; right: 10px; opacity: 0; font-size: 0.8rem; color: var(--text-muted); transition: 0.2s; }
-        .stat-card:hover .edit-hint { opacity: 1; }
+        .timer-strip { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 12px; border: 1px solid var(--border); }
+        .timer-display { font-family: var(--font-mono); font-size: 1.2rem; font-weight: 700; color: var(--primary); padding: 0 15px; }
+        
+        .btn { border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
+        .btn-primary { background: var(--primary); color: #fff; width: 100%; box-shadow: 0 5px 20px var(--primary-dim); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px var(--primary-dim); }
+        .btn-small { padding: 8px 12px; font-size: 0.8rem; }
 
-        /* --- INPUT SECTION (EDITABLE) --- */
-        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 15px; }
-        
-        .neon-input, .neon-select {
-            background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: #fff;
-            padding: 12px; border-radius: 10px; width: 100%; font-size: 0.95rem; outline: none; transition: 0.3s;
+        /* --- LIST --- */
+        .list-header { display: flex; justify-content: space-between; margin-bottom: 1rem; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+        .entry-row {
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255,255,255,0.02); padding: 12px 16px; border-radius: 12px;
+            margin-bottom: 8px; border-left: 3px solid transparent; transition: 0.2s;
         }
-        .neon-input:focus, .neon-select:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(168, 85, 247, 0.2); }
+        .entry-row:hover { background: rgba(255,255,255,0.05); transform: translateX(5px); }
+        .entry-row.type-work { border-color: var(--primary); }
+        .entry-row.type-vacation { border-color: var(--success); }
+        .entry-row.type-sick { border-color: var(--danger); }
         
-        /* Action Button */
-        .action-btn {
-            width: 100%; padding: 16px; border-radius: 12px; border: none; font-weight: 800; font-size: 1rem;
-            cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
-            background: var(--primary); color: white; box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
-        }
-        .action-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(168, 85, 247, 0.6); }
+        .tag { padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
         
-        /* Edit Mode State */
-        body.is-editing .action-btn { background: var(--edit-mode); box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4); }
-        body.is-editing .neon-input { border-color: var(--edit-mode); }
-        .cancel-edit { display: none; margin-top: 10px; background: transparent; border: 1px solid var(--border); color: var(--text-muted); width: 100%; padding: 8px; border-radius: 8px; cursor: pointer; }
-        body.is-editing .cancel-edit { display: block; }
-
-        /* --- VISUAL CHART (BARS) --- */
-        .chart-wrapper { height: 180px; display: flex; align-items: flex-end; gap: 8px; margin-top: 2rem; padding: 10px 0; border-bottom: 1px solid var(--border); }
-        .chart-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; position: relative; }
-        .chart-bar { 
-            width: 100%; background: #333; border-radius: 6px 6px 0 0; min-height: 4px; position: relative; transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            background: linear-gradient(to top, rgba(168,85,247,0.2), var(--primary));
-        }
-        .chart-bar.type-urlaub { background: linear-gradient(to top, rgba(16, 185, 129, 0.2), var(--success)); }
-        .chart-bar.type-krank { background: linear-gradient(to top, rgba(239, 68, 68, 0.2), var(--danger)); }
-        
-        /* Hover Info */
-        .chart-bar:hover::after {
-            content: attr(data-val); position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
-            background: #fff; color: #000; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; white-space: nowrap; z-index: 10;
-        }
-        .chart-label { margin-top: 8px; font-size: 0.75rem; color: var(--text-muted); }
-
-        /* --- LIST (EDITABLE) --- */
-        .entry-list { max-height: 500px; overflow-y: auto; padding-right: 5px; }
-        .entry-card {
-            background: rgba(255,255,255,0.03); border-radius: 12px; padding: 1rem; margin-bottom: 0.75rem;
-            display: flex; justify-content: space-between; align-items: center; border: 1px solid transparent; transition: 0.2s;
-        }
-        .entry-card:hover { border-color: var(--border); background: rgba(255,255,255,0.05); }
-        
-        .entry-left { display: flex; flex-direction: column; gap: 4px; }
-        .entry-date { font-weight: 700; color: #fff; }
-        .entry-meta { font-size: 0.8rem; color: var(--text-muted); display: flex; gap: 8px; align-items: center; }
-        .tag { padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; }
-        .tag-work { background: rgba(168,85,247,0.2); color: var(--primary); }
-        .tag-vac { background: rgba(16, 185, 129, 0.2); color: var(--success); }
-        .tag-sick { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
-        .tag-period { background: rgba(245, 158, 11, 0.2); color: var(--edit-mode); }
-
-        .entry-right { display: flex; align-items: center; gap: 1rem; }
-        .diff-bubble { font-family: monospace; font-weight: bold; font-size: 1rem; }
-        .positive { color: var(--success); } 
-        .negative { color: var(--danger); }
-
-        .btn-icon { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 6px; border-radius: 6px; transition: 0.2s; }
-        .btn-icon:hover { background: rgba(255,255,255,0.1); color: #fff; }
-        .btn-edit:hover { color: var(--edit-mode); }
-        .btn-del:hover { color: var(--danger); }
-
-        /* --- SETTINGS OVERLAY --- */
-        .settings-panel { display: none; border-top: 1px solid var(--border); margin-top: 20px; padding-top: 20px; animation: slideIn 0.3s; }
-        .settings-panel.active { display: block; }
-        @keyframes slideIn { from {opacity: 0; transform: translateY(-10px);} to {opacity: 1; transform: translateY(0);} }
-
-        /* --- MODAL --- */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        /* --- SETTINGS MODAL --- */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
         .modal.active { display: flex; }
-        .modal-content { background: #111; border: 1px solid var(--border); padding: 2rem; border-radius: 20px; width: 90%; max-width: 400px; }
-
+        .modal-box { background: #151518; border: 1px solid var(--border); width: 500px; padding: 2rem; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        
+        /* --- HELPERS --- */
+        .color-dot { width: 25px; height: 25px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
+        .color-dot.active { border-color: #fff; }
+        
     </style>
 </head>
 <body>
 
-<div class="container">
-    
-    <div class="header-row">
-        <div>
-            <div class="user-welcome" id="userNameDisplay">Willkommen zurück</div>
-            <h1 class="main-title">Dashboard</h1>
+    <nav class="sidebar">
+        <div class="brand">TIME.GOD</div>
+        
+        <div class="nav-item active" onclick="switchTab('dashboard')">
+            <span>📊</span> Dashboard
         </div>
-        <div style="text-align: right;">
-            <div style="font-size: 0.8rem; color: var(--text-muted);" id="currentDate"></div>
-            <button onclick="toggleSettings()" class="btn-icon" style="font-size:1.2rem; margin-top:5px;">⚙️</button>
+        <div class="nav-item" onclick="switchTab('history')">
+            <span>📅</span> Historie
         </div>
-    </div>
+        
+        <div class="nav-section">Verwaltung</div>
+        <div class="nav-item" onclick="openSettings()">
+            <span>⚙️</span> Einstellungen
+        </div>
+        <div class="nav-item" onclick="exportData()">
+            <span>💾</span> Backup Export
+        </div>
+        <div class="nav-item" onclick="document.getElementById('fileImp').click()">
+            <span>📂</span> Backup Import
+        </div>
+        <input type="file" id="fileImp" hidden onchange="importData(event)">
 
-    <div class="card settings-panel" id="settingsPanel">
-        <h3>⚙️ Einstellungen</h3>
-        <div class="input-grid" style="grid-template-columns: 1fr 1fr;">
-            <div>
-                <label style="font-size:0.8rem; color:#888;">Dein Name</label>
-                <input type="text" id="settingName" class="neon-input" placeholder="Name">
-            </div>
-            <div>
-                <label style="font-size:0.8rem; color:#888;">Wochenstunden (Info)</label>
-                <input type="number" class="neon-input" disabled value="40">
-            </div>
+        <div style="margin-top: auto;">
+            <div class="nav-section">Coming Soon</div>
+            <div class="nav-item" style="opacity:0.5; cursor: default;">🏆 Achievements</div>
+            <div class="nav-item" style="opacity:0.5; cursor: default;">🌴 Urlaubsplaner</div>
         </div>
-        <h4 style="margin-top:1rem; margin-bottom:0.5rem; font-size:0.9rem;">Soll-Stunden pro Tag</h4>
-        <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:5px; margin-bottom:1rem;">
-            <input type="number" id="h1" class="neon-input" style="text-align:center">
-            <input type="number" id="h2" class="neon-input" style="text-align:center">
-            <input type="number" id="h3" class="neon-input" style="text-align:center">
-            <input type="number" id="h4" class="neon-input" style="text-align:center">
-            <input type="number" id="h5" class="neon-input" style="text-align:center">
-        </div>
-        <button onclick="saveSettings()" class="action-btn" style="background:#333; font-size:0.8rem; padding:10px;">Speichern</button>
-    </div>
+    </nav>
 
-    <div class="stats-grid">
-        <div class="card stat-card clickable" onclick="openPeriodModal('week')">
-            <div class="edit-hint">EDIT</div>
-            <div class="progress-ring">
-                <svg width="120" height="120">
-                    <circle class="ring-bg" stroke="white" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"/>
-                    <circle id="ringWeek" class="ring-val" stroke="white" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"/>
-                </svg>
-                <div class="ring-center">
-                    <div class="ring-number" id="valWeek">0</div>
-                    <div class="ring-label">Woche</div>
+    <main class="main">
+        
+        <header class="header">
+            <div>
+                <div class="greeting" id="userGreeting">Willkommen zurück</div>
+                <h1 class="page-title">Dein Dashboard</h1>
+            </div>
+            <div class="date-badge" id="currentDate">loading...</div>
+        </header>
+
+        <div class="kpi-grid">
+            <div class="card kpi-card" onclick="openCorrection('week')">
+                <div class="progress-ring">
+                    <svg width="100" height="100">
+                        <circle class="ring-bg" cx="50" cy="50" r="42"></circle>
+                        <circle id="ringWeek" class="ring-val" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="264"></circle>
+                    </svg>
+                    <div class="ring-center">
+                        <div class="ring-num" id="valWeek">0</div>
+                        <div class="ring-lbl">Woche</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card kpi-card" onclick="openCorrection('month')">
+                <div class="progress-ring">
+                    <svg width="100" height="100">
+                        <circle class="ring-bg" cx="50" cy="50" r="42"></circle>
+                        <circle id="ringMonth" class="ring-val" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="264"></circle>
+                    </svg>
+                    <div class="ring-center">
+                        <div class="ring-num" id="valMonth">0</div>
+                        <div class="ring-lbl">Monat</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card" style="display:flex; flex-direction:column; justify-content:center;">
+                <div class="ring-lbl">GLEITZEIT KONTO</div>
+                <div style="font-size:2.5rem; font-weight:900; color:var(--primary); margin:10px 0;" id="valTotal">+0.0h</div>
+                <div style="font-size:0.8rem; color:var(--text-muted);">Jahresprognose: <span id="valProjected" style="color:#fff">0h</span></div>
+            </div>
+            <div class="card" style="display:flex; flex-direction:column; justify-content:center;">
+                <div class="ring-lbl">Ø ARBEITZEIT</div>
+                <div style="font-size:2rem; font-weight:800; color:#fff; margin:5px 0;" id="valAvg">0.0h</div>
+                <div class="ring-lbl" style="margin-top:10px;">URLAUBSTAGE</div>
+                <div style="font-size:1.5rem; font-weight:800; color:var(--success);">0 <span style="font-size:0.8rem; color:#666">/ 30</span></div>
+            </div>
+        </div>
+
+        <div class="charts-row">
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
+                    <h3>Saldo Trend</h3>
+                    <span style="font-size:0.8rem; color:var(--text-muted)">Letzte 30 Tage</span>
+                </div>
+                <div class="trend-container" id="trendChart">
+                    </div>
+            </div>
+
+            <div class="card">
+                <h3>Verteilung</h3>
+                <div class="donut-container">
+                    <svg width="140" height="140" viewBox="0 0 100 100" style="transform: rotate(-90deg);">
+                        <circle cx="50" cy="50" r="40" fill="transparent" stroke="#222" stroke-width="12"></circle>
+                        <circle id="donutSick" cx="50" cy="50" r="40" fill="transparent" stroke="var(--danger)" stroke-width="12" stroke-dasharray="0 251"></circle>
+                        <circle id="donutVac" cx="50" cy="50" r="40" fill="transparent" stroke="var(--success)" stroke-width="12" stroke-dasharray="0 251"></circle>
+                        <circle id="donutWork" cx="50" cy="50" r="40" fill="transparent" stroke="var(--primary)" stroke-width="12" stroke-dasharray="0 251"></circle>
+                    </svg>
+                </div>
+                <div class="donut-legend">
+                    <div class="legend-item"><div class="dot" style="background:var(--primary)"></div> Arbeit</div>
+                    <div class="legend-item"><div class="dot" style="background:var(--success)"></div> Urlaub</div>
+                    <div class="legend-item"><div class="dot" style="background:var(--danger)"></div> Krank</div>
                 </div>
             </div>
         </div>
-        
-        <div class="card stat-card clickable" onclick="openPeriodModal('month')">
-            <div class="edit-hint">EDIT</div>
-            <div class="progress-ring">
-                <svg width="120" height="120">
-                    <circle class="ring-bg" stroke="white" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"/>
-                    <circle id="ringMonth" class="ring-val" stroke="white" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"/>
-                </svg>
-                <div class="ring-center">
-                    <div class="ring-number" id="valMonth">0</div>
-                    <div class="ring-label">Monat</div>
+
+        <div class="card input-wrapper">
+            <div class="input-group">
+                <div style="display:flex; gap:10px;">
+                    <input type="date" id="inpDate" class="glass-input">
+                    <select id="inpType" class="glass-select" onchange="toggleTimeInputs()">
+                        <option value="work">💼 Arbeit</option>
+                        <option value="vacation">🌴 Urlaub</option>
+                        <option value="sick">💊 Krank</option>
+                    </select>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <input type="time" id="inpStart" class="glass-input">
+                    <input type="time" id="inpEnd" class="glass-input">
+                </div>
+                <input type="number" id="inpHours" class="glass-input" step="0.25" placeholder="Stunden manuell...">
+            </div>
+
+            <div style="display:flex; flex-direction:column; justify-content:space-between;">
+                <div class="timer-strip">
+                    <span style="font-size:1.5rem;">⏱️</span>
+                    <div class="timer-display" id="timerDisplay">00:00:00</div>
+                    <button class="btn btn-small" style="background:var(--success); color:#000" onclick="timerAction('start')">Start</button>
+                    <button class="btn btn-small" style="background:#f59e0b; color:#000" onclick="timerAction('pause')">Pause</button>
+                    <button class="btn btn-small" style="background:var(--danger); color:#fff" onclick="timerAction('stop')">Stop</button>
+                </div>
+                
+                <div style="display:flex; gap:10px;">
+                    <button id="mainBtn" class="btn btn-primary" onclick="handleEntry()">EINTRAGEN</button>
+                    <button id="cancelBtn" class="btn" style="background:#333; display:none;" onclick="resetEdit()">ABBRUCH</button>
                 </div>
             </div>
         </div>
 
-        <div class="card stat-card" style="align-items:flex-start; justify-content:space-between;">
-            <div>
-                <div class="ring-label" style="font-size:0.9rem; margin-bottom:5px;">SALDO GESAMT</div>
-                <div class="ring-number" id="valTotal" style="font-size:2.5rem;">+0.00h</div>
+        <div class="card">
+            <h3>Letzte Aktivitäten</h3>
+            <div id="entryList" style="margin-top:1rem;"></div>
+        </div>
+
+    </main>
+
+    <div class="modal" id="settingsModal">
+        <div class="modal-box">
+            <div style="display:flex; justify-content:space-between; margin-bottom:1.5rem;">
+                <h2>Einstellungen</h2>
+                <button onclick="closeSettings()" style="background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer;">&times;</button>
             </div>
-            <div style="width:100%; margin-top:auto;">
-                <div style="font-size:0.7rem; color:#888; margin-bottom:5px; display:flex; justify-content:space-between;">
-                    <span>Jahres-Fortschritt</span>
-                    <span id="yearProgressTxt">0%</span>
+            
+            <h4 style="color:var(--text-muted); margin-bottom:10px;">Dein Name</h4>
+            <input type="text" id="confName" class="glass-input" style="margin-bottom:1.5rem;">
+
+            <h4 style="color:var(--text-muted); margin-bottom:10px;">Theme Color</h4>
+            <div style="display:flex; gap:10px; margin-bottom:1.5rem;">
+                <div class="color-dot" style="background:#a855f7" onclick="setTheme('#a855f7')"></div>
+                <div class="color-dot" style="background:#3b82f6" onclick="setTheme('#3b82f6')"></div>
+                <div class="color-dot" style="background:#10b981" onclick="setTheme('#10b981')"></div>
+                <div class="color-dot" style="background:#f43f5e" onclick="setTheme('#f43f5e')"></div>
+                <div class="color-dot" style="background:#f59e0b" onclick="setTheme('#f59e0b')"></div>
+            </div>
+
+            <h4 style="color:var(--text-muted); margin-bottom:10px;">Auto-Pause (Regel)</h4>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:1.5rem;">
+                <div>
+                    <label style="font-size:0.7rem;">Ab Stunden:</label>
+                    <input type="number" id="confBreakThresh" class="glass-input" value="6">
                 </div>
-                <div style="height:4px; background:#333; border-radius:2px; width:100%;">
-                    <div id="yearProgressBar" style="height:100%; background:var(--primary); width:0%; border-radius:2px; box-shadow:0 0 10px var(--primary);"></div>
+                <div>
+                    <label style="font-size:0.7rem;">Abzug (Min):</label>
+                    <input type="number" id="confBreakMin" class="glass-input" value="30">
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div class="card">
-        <h3 style="margin-bottom:1rem;">Eintrag erfassen / bearbeiten</h3>
-        
-        <div class="input-grid" style="grid-template-columns: 1.5fr 1fr 1fr 1fr;">
-            <input type="date" id="inpDate" class="neon-input">
-            <select id="inpType" class="neon-select" onchange="toggleTimeInputs()">
-                <option value="work">💼 Arbeit</option>
-                <option value="vacation">🌴 Urlaub</option>
-                <option value="sick">💊 Krank</option>
-                <option value="holiday">🎉 Feiertag</option>
-            </select>
-            <input type="time" id="inpStart" class="neon-input" placeholder="Start">
-            <input type="time" id="inpEnd" class="neon-input" placeholder="Ende">
-        </div>
-        
-        <div class="input-grid" style="grid-template-columns: 1fr;">
-            <input type="number" id="inpHours" class="neon-input" step="0.25" placeholder="Oder Stunden direkt eingeben (z.B. 8.25)">
-        </div>
-
-        <button id="mainBtn" onclick="handleEntry()" class="action-btn">Eintrag hinzufügen</button>
-        <button onclick="resetEditMode()" class="cancel-edit">Bearbeiten abbrechen</button>
-        
-        <div class="chart-wrapper" id="weeklyChart">
+            <h4 style="color:var(--text-muted); margin-bottom:10px;">Soll-Stunden (Mo-Fr)</h4>
+            <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:5px; margin-bottom:2rem;">
+                <input type="number" id="h1" class="glass-input" style="padding:8px; text-align:center;">
+                <input type="number" id="h2" class="glass-input" style="padding:8px; text-align:center;">
+                <input type="number" id="h3" class="glass-input" style="padding:8px; text-align:center;">
+                <input type="number" id="h4" class="glass-input" style="padding:8px; text-align:center;">
+                <input type="number" id="h5" class="glass-input" style="padding:8px; text-align:center;">
             </div>
-    </div>
 
-    <div class="card">
-        <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
-            <h3>Verlauf</h3>
-            <div>
-                <button class="btn-icon" onclick="exportData()">💾 Backup</button>
-                <button class="btn-icon" onclick="document.getElementById('fileImp').click()">📂 Import</button>
-                <input type="file" id="fileImp" style="display:none" onchange="importData(event)">
-            </div>
+            <button class="btn btn-primary" onclick="saveSettings()">SPEICHERN</button>
         </div>
-        <div class="entry-list" id="entryList">
-            </div>
     </div>
 
-</div>
-
-<div class="modal" id="periodModal">
-    <div class="modal-content">
-        <h3 style="margin-bottom:1rem;">Korrektur buchen</h3>
-        <select id="pSelect" class="neon-select" style="margin-bottom:10px;"></select>
-        <input type="number" id="pVal" class="neon-input" placeholder="Differenz (+/-)" step="0.1" style="margin-bottom:15px;">
-        <button onclick="savePeriod()" class="action-btn">Speichern</button>
-        <button onclick="document.getElementById('periodModal').classList.remove('active')" class="cancel-edit" style="display:block; margin-top:10px;">Abbrechen</button>
+    <div class="modal" id="corrModal">
+        <div class="modal-box" style="width:400px;">
+            <h3>Korrektur buchen</h3>
+            <p style="color:var(--text-muted); margin-bottom:1rem; font-size:0.9rem;">Fügt eine manuelle Differenz zum Konto hinzu.</p>
+            <select id="corrSelect" class="glass-select" style="margin-bottom:10px;"></select>
+            <input type="number" id="corrVal" class="glass-input" placeholder="Stunden (+/-)" style="margin-bottom:1rem;">
+            <button class="btn btn-primary" onclick="saveCorrection()">BUCHEN</button>
+            <button class="btn" style="width:100%; margin-top:10px; background:#333;" onclick="document.getElementById('corrModal').classList.remove('active')">ABBRECHEN</button>
+        </div>
     </div>
-</div>
 
 <script>
-    // --- STATE ---
-    let entries = [];
-    let settings = {
-        name: 'User',
-        hours: { 1: 8.75, 2: 8.75, 3: 8.75, 4: 8.75, 5: 4.5 }
-    };
-    let editingId = null; // ID of entry currently being edited
+    // --- STATE & CONFIG ---
+    let data = { entries: [], settings: { name:'User', theme:'#a855f7', hours:[0,8.75,8.75,8.75,8.75,4.5,0], break:{thresh:6, min:30} } };
+    let timer = { id:null, start:0, paused:0, running:false };
+    let editId = null;
 
     // --- INIT ---
     window.onload = () => {
-        loadData();
+        if(localStorage.getItem('tg_data')) data = JSON.parse(localStorage.getItem('tg_data'));
+        applyTheme(data.settings.theme);
         updateUI();
-        setInterval(updateClock, 1000);
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('de-DE', {weekday:'long', day:'2-digit', month:'long'});
+        }, 1000);
         document.getElementById('inpDate').valueAsDate = new Date();
     };
 
-    function updateClock() {
-        const now = new Date();
-        document.getElementById('currentDate').textContent = now.toLocaleString('de-DE', { weekday:'long', day:'2-digit', month:'long', hour:'2-digit', minute:'2-digit' });
-    }
+    function save() { localStorage.setItem('tg_data', JSON.stringify(data)); updateUI(); }
 
-    // --- DATA HANDLING ---
-    function loadData() {
-        const d = localStorage.getItem('tt_god_data');
-        if(d) entries = JSON.parse(d);
-        const s = localStorage.getItem('tt_god_settings');
-        if(s) settings = JSON.parse(s);
-        
-        // Settings fill
-        document.getElementById('settingName').value = settings.name;
-        document.getElementById('userNameDisplay').textContent = `Willkommen, ${settings.name}`;
-        for(let i=1; i<=5; i++) document.getElementById(`h${i}`).value = settings.hours[i];
-    }
-
-    function saveData() {
-        localStorage.setItem('tt_god_data', JSON.stringify(entries));
-        localStorage.setItem('tt_god_settings', JSON.stringify(settings));
-    }
-
-    // --- LOGIC: ADD / UPDATE ---
+    // --- LOGIC ---
     function handleEntry() {
         const date = document.getElementById('inpDate').value;
         const type = document.getElementById('inpType').value;
@@ -351,325 +426,357 @@
         if(!date) return alert('Datum fehlt!');
 
         let worked = 0;
-        let dayOfWeek = new Date(date).getDay();
-        let expected = settings.hours[dayOfWeek] || 0;
+        let dayIndex = new Date(date).getDay(); // 0=Sun, 6=Sat
+        // Adjust index for settings array (0=Sun in JS, but usually handled differently. Let's map JS 0..6 directly to settings)
+        let expected = data.settings.hours[dayIndex] || 0;
+        let info = '';
 
-        // Logic for Types
-        if (type === 'work') {
-            if (start && end) {
+        if(type === 'work') {
+            if(start && end) {
                 let d1 = new Date(`2000-01-01T${start}`);
                 let d2 = new Date(`2000-01-01T${end}`);
-                worked = (d2 - d1) / 36e5;
-                if(worked < 0) worked += 24;
+                let diff = (d2 - d1) / 3.6e6;
+                if(diff < 0) diff += 24;
+                
+                // Auto Break
+                if(data.settings.break.thresh > 0 && diff >= data.settings.break.thresh) {
+                    diff -= (data.settings.break.min / 60);
+                    info = `${start}-${end} (Auto-Pause)`;
+                } else {
+                    info = `${start}-${end}`;
+                }
+                worked = diff;
             } else if (direct) {
                 worked = parseFloat(direct);
-            } else {
-                return alert('Bitte Zeit oder Stunden eingeben!');
-            }
+                info = 'Manuell';
+            } else return alert('Zeiten prüfen!');
         } else {
-            // Urlaub/Krank/Feiertag: Worked = Expected (Diff 0)
-            // Or simple 0 if it's weekend? Let's assume standard day logic.
-            worked = expected; 
-            // Optional: User could override hours for half-days vacation?
-            if(direct) worked = parseFloat(direct);
+            // Sick/Vacation = Target Reached
+            worked = expected;
+            info = type === 'vacation' ? 'Urlaubstag' : 'Krankmeldung';
         }
 
         const entry = {
-            id: editingId || Date.now(), // Use existing ID if editing
-            date: date,
-            type: type,
-            start: type === 'work' ? start : '',
-            end: type === 'work' ? end : '',
-            worked: worked,
-            expected: expected,
+            id: editId || Date.now(),
+            date, type, worked, expected, 
             diff: worked - expected,
-            isPeriod: false
+            info, isPeriod: false
         };
 
-        if (editingId) {
-            // Update existing
-            const idx = entries.findIndex(e => e.id === editingId);
-            if(idx !== -1) entries[idx] = entry;
-            resetEditMode();
+        if(editId) {
+            const idx = data.entries.findIndex(e => e.id === editId);
+            if(idx > -1) data.entries[idx] = entry;
+            resetEdit();
         } else {
-            // Add new
-            entries.push(entry);
+            data.entries.push(entry);
         }
-
-        entries.sort((a,b) => new Date(b.date) - new Date(a.date));
-        saveData();
-        updateUI();
         
-        // Clear Inputs (but keep Date)
+        data.entries.sort((a,b) => new Date(b.date) - new Date(a.date));
+        save();
+        
+        // Reset Inputs
         document.getElementById('inpStart').value = '';
         document.getElementById('inpEnd').value = '';
         document.getElementById('inpHours').value = '';
     }
 
-    // --- EDIT MODE LOGIC ---
-    function editEntry(id) {
-        const e = entries.find(x => x.id === id);
-        if(!e) return;
-        
-        editingId = id;
-        document.body.classList.add('is-editing');
-        
-        // Fill inputs
-        document.getElementById('inpDate').value = e.date;
-        document.getElementById('inpType').value = e.type || 'work';
-        document.getElementById('inpStart').value = e.start || '';
-        document.getElementById('inpEnd').value = e.end || '';
-        document.getElementById('inpHours').value = e.worked;
-        
-        // Visual updates
-        document.getElementById('mainBtn').textContent = "Eintrag aktualisieren";
-        toggleTimeInputs();
-        
-        // Scroll top
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function resetEditMode() {
-        editingId = null;
-        document.body.classList.remove('is-editing');
-        document.getElementById('mainBtn').textContent = "Eintrag hinzufügen";
-        document.getElementById('inpStart').value = '';
-        document.getElementById('inpEnd').value = '';
-        document.getElementById('inpHours').value = '';
-        document.getElementById('inpType').value = 'work';
-        toggleTimeInputs();
-    }
-
-    function deleteEntry(id) {
-        if(confirm('Wirklich löschen?')) {
-            entries = entries.filter(e => e.id !== id);
-            if(editingId === id) resetEditMode();
-            saveData();
-            updateUI();
-        }
-    }
-
-    function toggleTimeInputs() {
-        const t = document.getElementById('inpType').value;
-        const disable = t !== 'work';
-        document.getElementById('inpStart').disabled = disable;
-        document.getElementById('inpEnd').disabled = disable;
-        if(disable) {
-            document.getElementById('inpStart').style.opacity = 0.5;
-            document.getElementById('inpEnd').style.opacity = 0.5;
-        } else {
-            document.getElementById('inpStart').style.opacity = 1;
-            document.getElementById('inpEnd').style.opacity = 1;
-        }
-    }
-
-    // --- VISUALS & RENDERING ---
+    // --- UI UPDATES ---
     function updateUI() {
-        renderStats();
-        renderChart();
-        renderList();
-    }
-
-    function renderStats() {
-        const now = new Date();
-        const curKW = getKW(now);
+        document.getElementById('userGreeting').innerText = `Hallo, ${data.settings.name}`;
         
-        let diffW=0, diffM=0, diffTot=0;
-        let workW=0, expW=0, workM=0, expM=0;
+        // Calc Stats
+        const now = new Date();
+        let week=0, month=0, total=0, totalWorked=0, countDays=0;
+        let sickSum=0, vacSum=0, workSum=0;
+        
+        // Trend Data
+        let trendData = [];
+        let runningTotal = 0;
 
-        entries.forEach(e => {
-            diffTot += e.diff;
+        // Clone and sort asc for trend
+        let ascEntries = [...data.entries].sort((a,b) => new Date(a.date) - new Date(b.date));
+        
+        ascEntries.forEach(e => {
+            runningTotal += e.diff;
+            trendData.push(runningTotal); // Simple trend accumulation
+
+            // Sums for Donut
+            if(e.type==='sick') sickSum += e.worked;
+            else if(e.type==='vacation') vacSum += e.worked;
+            else workSum += e.worked;
+        });
+
+        // Main Loop (Desc)
+        data.entries.forEach(e => {
             const d = new Date(e.date);
-            
-            // Year check
-            if(d.getFullYear() === now.getFullYear()) {
-                // Month check
-                if(d.getMonth() === now.getMonth()) {
-                    diffM += e.diff;
-                    workM += e.worked;
-                    expM += e.expected;
-                    
-                    // Week check
-                    if(getKW(d) === curKW) {
-                        diffW += e.diff;
-                        workW += e.worked;
-                        expW += e.expected;
-                    }
-                }
+            total += e.diff;
+            if(e.type === 'work') { totalWorked += e.worked; countDays++; }
+
+            if(d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()) {
+                month += e.diff;
+                // Simple Week Check (Current ISO Week)
+                if(getWeek(d) === getWeek(now)) week += e.diff;
             }
         });
 
-        // Update Rings (Visuals)
-        updateRing('ringWeek', 'valWeek', workW, expW, diffW);
-        updateRing('ringMonth', 'valMonth', workM, expM, diffM);
+        // Update Radials
+        setRadial('ringWeek', 'valWeek', week);
+        setRadial('ringMonth', 'valMonth', month);
         
-        // Update Total
-        const totEl = document.getElementById('valTotal');
-        totEl.textContent = (diffTot >= 0 ? '+' : '') + diffTot.toFixed(2) + 'h';
-        totEl.style.color = diffTot >= 0 ? 'var(--success)' : 'var(--danger)';
+        // Text Stats
+        document.getElementById('valTotal').innerText = (total>=0?'+':'') + total.toFixed(2) + 'h';
+        document.getElementById('valTotal').style.color = total>=0 ? 'var(--primary)' : 'var(--danger)';
+        
+        const avg = countDays > 0 ? totalWorked/countDays : 0;
+        document.getElementById('valAvg').innerText = avg.toFixed(1) + 'h';
 
-        // Year Progress (Simple Day-of-Year calc)
-        const start = new Date(now.getFullYear(), 0, 0);
-        const diff = now - start;
-        const oneDay = 1000 * 60 * 60 * 24;
-        const dayOfYear = Math.floor(diff / oneDay);
-        const pct = (dayOfYear / 365) * 100;
-        document.getElementById('yearProgressBar').style.width = pct + '%';
-        document.getElementById('yearProgressTxt').textContent = Math.floor(pct) + '%';
+        // Projections
+        const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+        const dailyDrift = dayOfYear > 0 ? total / dayOfYear : 0;
+        const projected = total + (dailyDrift * (365 - dayOfYear));
+        document.getElementById('valProjected').innerText = (projected>=0?'+':'') + projected.toFixed(0) + 'h';
+
+        renderList();
+        renderTrend(trendData);
+        renderDonut(workSum, vacSum, sickSum);
     }
 
-    function updateRing(ringId, txtId, work, exp, diff) {
-        // Calculate Percentage of Target Reached
-        // Safe divide
-        const pct = exp > 0 ? (work / exp) * 100 : 0;
-        
-        // SVG Logic: Circumference = 2 * PI * r (r=52) ≈ 326.72
-        const circ = 326;
-        const offset = circ - (Math.min(pct, 100) / 100) * circ;
-        
-        const ring = document.getElementById(ringId);
-        ring.style.strokeDashoffset = offset;
-        
-        // Color logic: If diff < 0 (under target), yellow/orange? No, keep primary until 100%
-        ring.style.stroke = diff >= 0 ? 'var(--success)' : 'var(--primary)';
-
+    function setRadial(ringId, txtId, val) {
+        // Max range assumption for visual: +/- 10h
+        const el = document.getElementById(ringId);
         const txt = document.getElementById(txtId);
-        txt.textContent = (diff >= 0 ? '+' : '') + diff.toFixed(1) + 'h';
-        txt.style.color = diff >= 0 ? 'var(--success)' : '#fff';
-    }
-
-    function renderChart() {
-        const wrap = document.getElementById('weeklyChart');
-        wrap.innerHTML = '';
+        // Circle circumference 264 (r=42)
+        // Let's map val to progress. 0 = 50%, +10 = 100%, -10 = 0%
+        let pct = 0.5 + (val / 40); // 20h range
+        if(pct > 1) pct = 1; if(pct < 0) pct = 0;
         
-        // Last 7 days
-        for(let i=6; i>=0; i--) {
-            const d = new Date();
-            d.setDate(d.getDate() - i);
-            const iso = d.toISOString().split('T')[0];
-            
-            // Find entries for this day
-            const daysEntries = entries.filter(e => e.date === iso && !e.isPeriod);
-            const totalWork = daysEntries.reduce((sum, e) => sum + e.worked, 0);
-            
-            // Determine type for color (prioritize vacation/sick)
-            let typeClass = '';
-            if(daysEntries.some(e => e.type === 'sick')) typeClass = 'type-krank';
-            else if(daysEntries.some(e => e.type === 'vacation')) typeClass = 'type-urlaub';
-
-            // Scale max 10h
-            const h = Math.min((totalWork / 10) * 100, 100);
-            
-            const col = document.createElement('div');
-            col.className = 'chart-col';
-            col.innerHTML = `
-                <div class="chart-bar ${typeClass}" style="height:${h}%" data-val="${totalWork.toFixed(2)}h"></div>
-                <div class="chart-label">${d.toLocaleDateString('de-DE',{weekday:'short'})}</div>
-            `;
-            wrap.appendChild(col);
-        }
+        const offset = 264 - (pct * 264);
+        el.style.strokeDashoffset = offset;
+        el.style.stroke = val >= 0 ? 'var(--primary)' : 'var(--danger)';
+        
+        txt.innerText = (val>=0?'+':'') + val.toFixed(1) + 'h';
     }
 
     function renderList() {
-        const list = document.getElementById('entryList');
-        list.innerHTML = '';
+        const c = document.getElementById('entryList');
+        c.innerHTML = data.entries.map(e => `
+            <div class="entry-row type-${e.type}">
+                <div style="width:100px; font-weight:bold;">${new Date(e.date).toLocaleDateString('de-DE')}</div>
+                <div style="flex:1; font-size:0.85rem; color:#aaa;">${e.isPeriod ? e.label : e.info}</div>
+                <div class="tag" style="margin-right:10px;">${e.type}</div>
+                <div style="font-weight:bold; width:60px; text-align:right; color:${e.diff>=0?'var(--success)':'var(--danger)'}">
+                    ${e.diff>=0?'+':''}${e.diff.toFixed(2)}
+                </div>
+                <div style="margin-left:15px;">
+                    <button class="btn-icon" onclick="editEntry(${e.id})">✎</button>
+                    <button class="btn-icon" onclick="delEntry(${e.id})">×</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // --- CHARTS (SVG) ---
+    function renderTrend(dataPoints) {
+        const c = document.getElementById('trendChart');
+        if(dataPoints.length < 2) { c.innerHTML = '<div style="text-align:center; padding-top:80px; color:#555;">No Data</div>'; return; }
         
-        entries.forEach(e => {
-            let badge = '';
-            if(e.isPeriod) badge = `<span class="tag tag-period">${e.label}</span>`;
-            else if(e.type === 'vacation') badge = `<span class="tag tag-vac">Urlaub</span>`;
-            else if(e.type === 'sick') badge = `<span class="tag tag-sick">Krank</span>`;
-            else badge = `<span class="tag tag-work">Arbeit</span>`;
-
-            const timeStr = e.start ? `${e.start} - ${e.end}` : `${e.worked.toFixed(2)}h Pauschal`;
-
-            const div = document.createElement('div');
-            div.className = 'entry-card';
-            div.innerHTML = `
-                <div class="entry-left">
-                    <div class="entry-date">${new Date(e.date).toLocaleDateString('de-DE')} ${e.isPeriod ? '' : badge}</div>
-                    <div class="entry-meta">${timeStr}</div>
-                </div>
-                <div class="entry-right">
-                    <div class="diff-bubble ${e.diff>=0?'positive':'negative'}">${e.diff>=0?'+':''}${e.diff.toFixed(2)}</div>
-                    <button class="btn-icon btn-edit" onclick="editEntry(${e.id})">✎</button>
-                    <button class="btn-icon btn-del" onclick="deleteEntry(${e.id})">×</button>
-                </div>
-            `;
-            list.appendChild(div);
+        // Limit to last 30
+        const subset = dataPoints.slice(-30);
+        const max = Math.max(...subset);
+        const min = Math.min(...subset);
+        const range = max - min || 1;
+        
+        const w = c.clientWidth || 600;
+        const h = 200;
+        
+        let path = '';
+        subset.forEach((val, i) => {
+            const x = (i / (subset.length - 1)) * w;
+            const y = h - ((val - min) / range * (h - 20)) - 10; // Padding
+            path += `${i===0?'M':'L'} ${x} ${y} `;
         });
+
+        c.innerHTML = `
+            <svg class="trend-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+                <path d="${path}" class="trend-line" />
+                <path d="${path} L ${w} ${h} L 0 ${h} Z" class="trend-area" />
+            </svg>
+        `;
     }
 
-    // --- UTILS & SETTINGS ---
-    function toggleSettings() { document.getElementById('settingsPanel').classList.toggle('active'); }
-    function saveSettings() {
-        settings.name = document.getElementById('settingName').value;
-        for(let i=1; i<=5; i++) settings.hours[i] = parseFloat(document.getElementById(`h${i}`).value)||0;
-        saveData(); updateUI(); toggleSettings();
+    function renderDonut(work, vac, sick) {
+        const total = work + vac + sick || 1;
+        const c = 251; // 2 * pi * 40
+        
+        const setSeg = (id, val, offset) => {
+            const el = document.getElementById(id);
+            const dash = (val / total) * c;
+            el.style.strokeDasharray = `${dash} ${c}`;
+            el.style.strokeDashoffset = -offset;
+            return offset + dash;
+        };
+
+        let off = 0;
+        off = setSeg('donutWork', work, off);
+        off = setSeg('donutVac', vac, off);
+        off = setSeg('donutSick', sick, off);
     }
-    function getKW(d) {
+
+    // --- TIMER ---
+    function timerAction(act) {
+        if(act === 'start') {
+            if(!timer.running) { timer.start = Date.now(); timer.running = true; timerRun(); }
+        } else if(act === 'pause') {
+            timer.running = false; timer.paused += Date.now() - timer.start;
+        } else if(act === 'stop') {
+            timer.running = false; 
+            let total = timer.paused + (Date.now() - timer.start);
+            let h = total / 3.6e6;
+            if(confirm(`Zeit stoppen: ${h.toFixed(2)}h?`)) {
+                document.getElementById('inpHours').value = h.toFixed(2);
+                document.getElementById('inpType').value = 'work';
+                document.getElementById('inpDate').valueAsDate = new Date();
+                handleEntry();
+                timer = {id:null, start:0, paused:0, running:false};
+                document.getElementById('timerDisplay').innerText = "00:00:00";
+            }
+        }
+    }
+    
+    function timerRun() {
+        if(!timer.running) return;
+        requestAnimationFrame(timerRun);
+        const diff = (Date.now() - timer.start) + timer.paused;
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        document.getElementById('timerDisplay').innerText = 
+            `${h<10?'0'+h:h}:${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
+    }
+
+    // --- SETTINGS & HELPERS ---
+    function openSettings() {
+        document.getElementById('settingsModal').classList.add('active');
+        document.getElementById('confName').value = data.settings.name;
+        document.getElementById('confBreakThresh').value = data.settings.break.thresh;
+        document.getElementById('confBreakMin').value = data.settings.break.min;
+        for(let i=1; i<=5; i++) document.getElementById('h'+i).value = data.settings.hours[i];
+    }
+    function saveSettings() {
+        data.settings.name = document.getElementById('confName').value;
+        data.settings.break.thresh = parseFloat(document.getElementById('confBreakThresh').value);
+        data.settings.break.min = parseFloat(document.getElementById('confBreakMin').value);
+        for(let i=1; i<=5; i++) data.settings.hours[i] = parseFloat(document.getElementById('h'+i).value);
+        
+        save();
+        document.getElementById('settingsModal').classList.remove('active');
+    }
+    function closeSettings() { document.getElementById('settingsModal').classList.remove('active'); }
+    
+    function setTheme(hex) {
+        data.settings.theme = hex;
+        applyTheme(hex);
+    }
+    
+    function applyTheme(hex) {
+        document.documentElement.style.setProperty('--primary', hex);
+        // Generate RGB for simple alpha usage
+        const r = parseInt(hex.slice(1,3), 16), g = parseInt(hex.slice(3,5), 16), b = parseInt(hex.slice(5,7), 16);
+        document.documentElement.style.setProperty('--primary-rgb', `${r},${g},${b}`);
+        document.documentElement.style.setProperty('--primary-dim', `rgba(${r},${g},${b}, 0.2)`);
+    }
+
+    function editEntry(id) {
+        const e = data.entries.find(x => x.id === id);
+        editId = id;
+        document.getElementById('inpDate').value = e.date;
+        document.getElementById('inpType').value = e.type;
+        document.getElementById('inpHours').value = e.worked;
+        document.getElementById('mainBtn').innerText = "UPDATE";
+        document.getElementById('cancelBtn').style.display = "block";
+    }
+    
+    function resetEdit() {
+        editId = null;
+        document.getElementById('mainBtn').innerText = "EINTRAGEN";
+        document.getElementById('cancelBtn').style.display = "none";
+        document.getElementById('inpStart').value = '';
+        document.getElementById('inpEnd').value = '';
+        document.getElementById('inpHours').value = '';
+    }
+
+    function delEntry(id) {
+        if(confirm('Löschen?')) {
+            data.entries = data.entries.filter(e => e.id !== id);
+            save();
+        }
+    }
+
+    // --- CORRECTION MODAL ---
+    let corrType = '';
+    function openCorrection(type) {
+        corrType = type;
+        const modal = document.getElementById('corrModal');
+        const sel = document.getElementById('corrSelect');
+        sel.innerHTML = '';
+        
+        const now = new Date();
+        if(type === 'week') {
+            for(let i=0; i<20; i++) {
+                let d = new Date(now); d.setDate(d.getDate() - i*7);
+                sel.add(new Option(`KW ${getWeek(d)}`, `KW ${getWeek(d)}`));
+            }
+        } else {
+            for(let i=0; i<12; i++) {
+                let d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+                sel.add(new Option(d.toLocaleDateString('de-DE',{month:'long', year:'numeric'}), d.toISOString()));
+            }
+        }
+        modal.classList.add('active');
+    }
+
+    function saveCorrection() {
+        const val = parseFloat(document.getElementById('corrVal').value);
+        if(!val) return;
+        const sel = document.getElementById('corrSelect');
+        
+        data.entries.push({
+            id: Date.now(),
+            date: new Date().toISOString().split('T')[0],
+            isPeriod: true,
+            label: `Korrektur: ${sel.value}`,
+            diff: val, worked:0, expected:0, type:'work', info:'Manuelle Korrektur'
+        });
+        save();
+        document.getElementById('corrModal').classList.remove('active');
+    }
+
+    function getWeek(d) {
         d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
         d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
         var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
         return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
     }
-
-    // --- PERIOD MODAL ---
-    let curP = '';
-    function openPeriodModal(t) {
-        curP = t;
-        const s = document.getElementById('pSelect'); s.innerHTML='';
-        const now = new Date();
-        document.getElementById('periodModal').classList.add('active');
-        
-        if(t === 'week') {
-            for(let i=0; i<52; i++) {
-                let d = new Date(now); d.setDate(d.getDate()-i*7);
-                let opt = document.createElement('option');
-                opt.text = `KW ${getKW(d)} ${d.getFullYear()}`;
-                s.add(opt);
-            }
-        } else {
-            const m = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
-            for(let i=0; i<24; i++) {
-                let d = new Date(now.getFullYear(), now.getMonth()-i, 1);
-                let opt = document.createElement('option');
-                opt.text = `${m[d.getMonth()]} ${d.getFullYear()}`;
-                s.add(opt);
-            }
-        }
-    }
-    function savePeriod() {
-        const val = parseFloat(document.getElementById('pVal').value);
-        if(isNaN(val)) return;
-        const sel = document.getElementById('pSelect');
-        const txt = sel.options[sel.selectedIndex].text;
-        
-        entries.push({
-            id: Date.now(),
-            date: new Date().toISOString().split('T')[0],
-            isPeriod: true,
-            label: txt,
-            diff: val,
-            worked: 0, expected: 0
-        });
-        saveData(); updateUI();
-        document.getElementById('periodModal').classList.remove('active');
+    
+    function toggleTimeInputs() {
+        const t = document.getElementById('inpType').value;
+        const els = [document.getElementById('inpStart'), document.getElementById('inpEnd')];
+        els.forEach(e => e.disabled = (t !== 'work'));
     }
 
-    // --- IMPORT / EXPORT ---
     function exportData() {
-        const b = new Blob([JSON.stringify(entries)],{type:'application/json'});
-        const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download='backup.json'; a.click();
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], {type:'application/json'}));
+        a.download = 'time_god_backup.json';
+        a.click();
     }
+    
     function importData(e) {
         const r = new FileReader();
-        r.onload = ev => { 
-            try { entries=JSON.parse(ev.target.result); saveData(); updateUI(); } 
-            catch(err){alert('Fehler');} 
-        };
+        r.onload = ev => { try { data = JSON.parse(ev.target.result); save(); location.reload(); } catch(x){alert('Error');} };
         r.readAsText(e.target.files[0]);
     }
+
 </script>
 </body>
 </html>
