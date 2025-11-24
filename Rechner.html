@@ -3,23 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TimeTracker GOD MODE V3</title>
+    <title>TimeTracker PRO</title>
     <style>
         /* --- CORE VARIABLES --- */
         :root {
-            --bg-deep: #050505;
-            --bg-glass: rgba(20, 20, 25, 0.6);
+            --bg-deep: #030305;
+            --bg-glass: rgba(22, 22, 26, 0.65);
+            --bg-sidebar: rgba(10, 10, 12, 0.95);
             --sidebar-width: 260px;
-            --primary: #a855f7; /* Default Neon Purple */
-            --primary-dim: rgba(168, 85, 247, 0.15);
-            --text-main: #ffffff;
+            --primary: #a855f7;
+            --primary-dim: rgba(168, 85, 247, 0.1);
+            --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --success: #10b981;
             --danger: #ef4444;
-            --warning: #f59e0b;
-            --border: rgba(255, 255, 255, 0.08);
-            --font-main: 'Inter', system-ui, -apple-system, sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
+            --border: rgba(255, 255, 255, 0.06);
+            --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Roboto Mono', monospace;
+            --radius: 20px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -27,9 +28,10 @@
         body {
             font-family: var(--font-main);
             background-color: var(--bg-deep);
+            /* Subtler, more professional gradient */
             background-image: 
-                radial-gradient(circle at 0% 0%, rgba(var(--primary-rgb), 0.15), transparent 50%),
-                radial-gradient(circle at 90% 90%, rgba(var(--primary-rgb), 0.1), transparent 50%);
+                radial-gradient(circle at 15% 15%, rgba(var(--primary-rgb), 0.08), transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(var(--primary-rgb), 0.05), transparent 40%);
             color: var(--text-main);
             min-height: 100vh;
             display: flex;
@@ -39,169 +41,189 @@
         /* --- SIDEBAR --- */
         .sidebar {
             width: var(--sidebar-width);
-            background: rgba(10, 10, 12, 0.95);
-            backdrop-filter: blur(20px);
+            background: var(--bg-sidebar);
+            backdrop-filter: blur(24px);
             border-right: 1px solid var(--border);
             height: 100vh;
             position: fixed;
-            padding: 2rem 1.5rem;
+            padding: 2.5rem 1.5rem;
             display: flex;
             flex-direction: column;
             z-index: 100;
         }
 
         .brand {
-            font-size: 1.5rem;
-            font-weight: 900;
-            letter-spacing: -1px;
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
             margin-bottom: 3rem;
-            background: linear-gradient(to right, #fff, var(--primary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
+        .brand::before { content:''; display:block; width:12px; height:12px; background:var(--primary); border-radius:50%; box-shadow:0 0 15px var(--primary); }
 
         .nav-item {
-            display: flex; align-items: center; gap: 12px;
-            padding: 12px 15px;
-            margin-bottom: 5px;
+            display: flex; align-items: center; gap: 14px;
+            padding: 14px 16px;
+            margin-bottom: 6px;
             border-radius: 12px;
             color: var(--text-muted);
             text-decoration: none;
-            transition: all 0.3s;
+            transition: all 0.2s ease;
             cursor: pointer;
             font-weight: 500;
+            font-size: 0.95rem;
+            border: 1px solid transparent;
         }
 
-        .nav-item:hover, .nav-item.active {
-            background: var(--primary-dim);
-            color: var(--primary);
+        .nav-item:hover { background: rgba(255,255,255,0.03); color: #fff; }
+        
+        .nav-item.active { 
+            background: var(--primary-dim); 
+            color: var(--primary); 
+            border-color: rgba(168, 85, 247, 0.2);
         }
-
-        .nav-item.active { box-shadow: 0 0 15px var(--primary-dim); border: 1px solid rgba(255,255,255,0.05); }
 
         .nav-section {
-            font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px;
-            color: var(--text-muted); margin-top: 2rem; margin-bottom: 1rem; opacity: 0.7;
+            font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+            color: #475569; margin-top: 2.5rem; margin-bottom: 1rem; padding-left: 10px;
         }
 
-        /* --- MAIN CONTENT --- */
+        /* --- MAIN CONTENT & VIEWS --- */
         .main {
             margin-left: var(--sidebar-width);
             flex: 1;
-            padding: 2.5rem;
+            padding: 3rem;
             width: calc(100% - var(--sidebar-width));
         }
 
-        /* --- GLASS CARDS --- */
+        .view-section { display: none; animation: fadeIn 0.4s ease forwards; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- GLASS CARDS (Refined) --- */
         .card {
             background: var(--bg-glass);
-            backdrop-filter: blur(16px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 1.5rem;
+            border-radius: var(--radius);
+            padding: 1.75rem;
             margin-bottom: 1.5rem;
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.2s, border-color 0.2s;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
         }
-        .card:hover { border-color: var(--primary); }
 
         /* --- HEADER --- */
-        .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; }
-        .greeting { font-size: 0.9rem; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-        .page-title { font-size: 2.5rem; font-weight: 800; line-height: 1.1; }
-        .date-badge { background: var(--bg-glass); padding: 8px 16px; border-radius: 50px; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted); }
+        .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2.5rem; }
+        .greeting { font-size: 0.85rem; color: var(--primary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; }
+        .page-title { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; }
+        .date-badge { 
+            background: rgba(255,255,255,0.03); padding: 10px 20px; border-radius: 50px; 
+            border: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.9rem; color: var(--text-muted); 
+        }
 
-        /* --- KPI GRID (RADIALS) --- */
-        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+        /* --- KPI GRID --- */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
         
         .kpi-card {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 2rem 1rem; cursor: pointer;
+            padding: 2rem 1rem; cursor: pointer; transition: transform 0.2s, border-color 0.2s;
         }
-        .kpi-card:hover .ring-val { stroke: #fff; filter: drop-shadow(0 0 8px #fff); }
+        .kpi-card:hover { transform: translateY(-3px); border-color: var(--primary); }
 
-        /* SVG RINGS */
-        .progress-ring { position: relative; width: 100px; height: 100px; }
+        /* SVG RINGS (Thinner, cleaner) */
+        .progress-ring { position: relative; width: 110px; height: 110px; }
         .progress-ring circle {
-            fill: transparent; stroke-width: 8; stroke-linecap: round;
+            fill: transparent; stroke-width: 6; stroke-linecap: round; /* Thinner stroke */
             transform: rotate(-90deg); transform-origin: 50% 50%;
         }
-        .ring-bg { stroke: rgba(255,255,255,0.05); }
-        .ring-val { stroke: var(--primary); transition: stroke-dashoffset 1s ease; filter: drop-shadow(0 0 10px var(--primary)); }
+        .ring-bg { stroke: rgba(255,255,255,0.04); }
+        .ring-val { stroke: var(--primary); transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1); filter: drop-shadow(0 0 8px var(--primary)); }
         
         .ring-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
-        .ring-num { font-size: 1.1rem; font-weight: 800; color: #fff; }
-        .ring-lbl { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-top: 2px; }
+        .ring-num { font-size: 1.25rem; font-weight: 700; color: #fff; font-family: var(--font-mono); }
+        .ring-lbl { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; margin-top: 4px; letter-spacing: 0.5px; }
 
-        /* --- CHARTS SECTION --- */
+        /* --- CHARTS --- */
         .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
         
-        /* Trend Chart (SVG) */
-        .trend-container { height: 200px; width: 100%; position: relative; }
-        .trend-svg { width: 100%; height: 100%; overflow: visible; }
-        .trend-line { fill: none; stroke: var(--primary); stroke-width: 3; stroke-linecap: round; filter: drop-shadow(0 0 10px var(--primary)); }
-        .trend-area { fill: var(--primary); opacity: 0.1; }
-        .trend-grid { stroke: rgba(255,255,255,0.05); stroke-width: 1; }
+        .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .chart-title { font-size: 1rem; font-weight: 600; }
+        .chart-sub { font-size: 0.8rem; color: var(--text-muted); }
 
-        /* Donut Chart */
-        .donut-container { display: flex; align-items: center; justify-content: center; height: 200px; position: relative; }
-        .donut-legend { margin-top: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.8rem; }
-        .legend-item { display: flex; align-items: center; color: var(--text-muted); }
-        .dot { width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; }
+        .trend-container { height: 220px; width: 100%; position: relative; }
+        .trend-line { fill: none; stroke: var(--primary); stroke-width: 2.5; stroke-linecap: round; filter: drop-shadow(0 0 10px var(--primary)); }
+        .trend-area { fill: var(--primary); opacity: 0.08; }
+        .trend-grid { stroke: rgba(255,255,255,0.03); stroke-width: 1; }
+
+        .donut-container { display: flex; align-items: center; justify-content: center; height: 180px; position: relative; }
+        .donut-legend { margin-top: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.8rem; }
+        .legend-item { display: flex; align-items: center; color: var(--text-muted); gap: 8px; }
+        .dot { width: 8px; height: 8px; border-radius: 2px; }
 
         /* --- INPUTS --- */
-        .input-wrapper { display: grid; grid-template-columns: 1fr 1.5fr; gap: 2rem; }
-        .input-group { display: flex; flex-direction: column; gap: 1rem; }
+        .input-wrapper { display: grid; grid-template-columns: 1fr 300px; gap: 2rem; }
         
         .glass-input, .glass-select {
-            background: rgba(0,0,0,0.2); border: 1px solid var(--border);
-            padding: 14px; border-radius: 12px; color: #fff; font-size: 1rem; width: 100%; outline: none; transition: 0.3s;
+            background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+            padding: 16px; border-radius: 12px; color: #fff; font-size: 0.95rem; width: 100%; outline: none; transition: 0.2s;
+            font-family: var(--font-main);
         }
-        .glass-input:focus { border-color: var(--primary); box-shadow: 0 0 15px var(--primary-dim); }
+        .glass-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-dim); background: rgba(0,0,0,0.4); }
         
-        .timer-strip { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 12px; border: 1px solid var(--border); }
-        .timer-display { font-family: var(--font-mono); font-size: 1.2rem; font-weight: 700; color: var(--primary); padding: 0 15px; }
+        .timer-box { 
+            background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem;
+        }
+        .timer-display { font-family: var(--font-mono); font-size: 2rem; font-weight: 700; color: #fff; text-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        .timer-active .timer-display { color: var(--primary); text-shadow: 0 0 20px var(--primary); }
         
-        .btn { border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
-        .btn-primary { background: var(--primary); color: #fff; width: 100%; box-shadow: 0 5px 20px var(--primary-dim); }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px var(--primary-dim); }
-        .btn-small { padding: 8px 12px; font-size: 0.8rem; }
+        .btn { border: none; padding: 14px 24px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.9rem; letter-spacing: 0.5px; }
+        .btn-primary { background: var(--primary); color: #fff; width: 100%; box-shadow: 0 5px 20px -5px var(--primary); }
+        .btn-primary:hover { filter: brightness(1.1); transform: translateY(-2px); }
+        
+        .btn-icon-row { display: flex; gap: 8px; width: 100%; }
+        .btn-ghost { background: rgba(255,255,255,0.05); color: #fff; flex: 1; padding: 10px; }
+        .btn-ghost:hover { background: rgba(255,255,255,0.1); }
 
-        /* --- LIST --- */
-        .list-header { display: flex; justify-content: space-between; margin-bottom: 1rem; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+        /* --- LISTS --- */
         .entry-row {
             display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255,255,255,0.02); padding: 12px 16px; border-radius: 12px;
+            background: rgba(255,255,255,0.02); padding: 16px 20px; border-radius: 14px;
             margin-bottom: 8px; border-left: 3px solid transparent; transition: 0.2s;
         }
-        .entry-row:hover { background: rgba(255,255,255,0.05); transform: translateX(5px); }
+        .entry-row:hover { background: rgba(255,255,255,0.04); transform: translateX(4px); }
         .entry-row.type-work { border-color: var(--primary); }
         .entry-row.type-vacation { border-color: var(--success); }
         .entry-row.type-sick { border-color: var(--danger); }
         
-        .tag { padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
+        .entry-date { font-weight: 600; color: #fff; font-size: 0.95rem; }
+        .entry-meta { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
+        .tag { padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; background: rgba(255,255,255,0.05); }
+
+        /* --- MODAL --- */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200; justify-content: center; align-items: center; backdrop-filter: blur(10px); }
+        .modal.active { display: flex; animation: fadeIn 0.2s ease; }
+        .modal-box { background: #121215; border: 1px solid var(--border); width: 480px; padding: 2.5rem; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
         
-        /* --- SETTINGS MODAL --- */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
-        .modal.active { display: flex; }
-        .modal-box { background: #151518; border: 1px solid var(--border); width: 500px; padding: 2rem; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        
-        /* --- HELPERS --- */
-        .color-dot { width: 25px; height: 25px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
-        .color-dot.active { border-color: #fff; }
-        
+        .color-dot { width: 32px; height: 32px; border-radius: 50%; cursor: pointer; border: 2px solid rgba(255,255,255,0.1); transition: 0.2s; }
+        .color-dot.active { border-color: #fff; transform: scale(1.1); }
+
     </style>
 </head>
 <body>
 
     <nav class="sidebar">
-        <div class="brand">TIME.GOD</div>
+        <div class="brand">
+            TIME.PRO
+        </div>
         
-        <div class="nav-item active" onclick="switchTab('dashboard')">
+        <div class="nav-item active" id="nav-dashboard" onclick="switchTab('dashboard')">
             <span>📊</span> Dashboard
         </div>
-        <div class="nav-item" onclick="switchTab('history')">
+        <div class="nav-item" id="nav-history" onclick="switchTab('history')">
             <span>📅</span> Historie
         </div>
         
@@ -210,188 +232,207 @@
             <span>⚙️</span> Einstellungen
         </div>
         <div class="nav-item" onclick="exportData()">
-            <span>💾</span> Backup Export
+            <span>💾</span> Backup
         </div>
         <div class="nav-item" onclick="document.getElementById('fileImp').click()">
-            <span>📂</span> Backup Import
+            <span>📂</span> Import
         </div>
         <input type="file" id="fileImp" hidden onchange="importData(event)">
-
-        <div style="margin-top: auto;">
-            <div class="nav-section">Coming Soon</div>
-            <div class="nav-item" style="opacity:0.5; cursor: default;">🏆 Achievements</div>
-            <div class="nav-item" style="opacity:0.5; cursor: default;">🌴 Urlaubsplaner</div>
-        </div>
     </nav>
 
     <main class="main">
         
         <header class="header">
             <div>
-                <div class="greeting" id="userGreeting">Willkommen zurück</div>
-                <h1 class="page-title">Dein Dashboard</h1>
+                <div class="greeting" id="userGreeting">Willkommen</div>
+                <h1 class="page-title">Übersicht</h1>
             </div>
             <div class="date-badge" id="currentDate">loading...</div>
         </header>
 
-        <div class="kpi-grid">
-            <div class="card kpi-card" onclick="openCorrection('week')">
-                <div class="progress-ring">
-                    <svg width="100" height="100">
-                        <circle class="ring-bg" cx="50" cy="50" r="42"></circle>
-                        <circle id="ringWeek" class="ring-val" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="264"></circle>
-                    </svg>
-                    <div class="ring-center">
-                        <div class="ring-num" id="valWeek">0</div>
-                        <div class="ring-lbl">Woche</div>
+        <div id="view-dashboard" class="view-section active">
+            
+            <div class="kpi-grid">
+                <div class="card kpi-card" onclick="openCorrection('week')">
+                    <div class="progress-ring">
+                        <svg width="100" height="100">
+                            <circle class="ring-bg" cx="50" cy="50" r="44"></circle>
+                            <circle id="ringWeek" class="ring-val" cx="50" cy="50" r="44" stroke-dasharray="276" stroke-dashoffset="276"></circle>
+                        </svg>
+                        <div class="ring-center">
+                            <div class="ring-num" id="valWeek">0</div>
+                            <div class="ring-lbl">Woche</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card kpi-card" onclick="openCorrection('month')">
+                    <div class="progress-ring">
+                        <svg width="100" height="100">
+                            <circle class="ring-bg" cx="50" cy="50" r="44"></circle>
+                            <circle id="ringMonth" class="ring-val" cx="50" cy="50" r="44" stroke-dasharray="276" stroke-dashoffset="276"></circle>
+                        </svg>
+                        <div class="ring-center">
+                            <div class="ring-num" id="valMonth">0</div>
+                            <div class="ring-lbl">Monat</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="display:flex; flex-direction:column; justify-content:center;">
+                    <div class="ring-lbl">GLEITZEIT KONTO</div>
+                    <div style="font-size:2.8rem; font-weight:800; color:var(--primary); margin:10px 0; font-family:var(--font-mono); letter-spacing:-2px;" id="valTotal">+0.0h</div>
+                    <div style="font-size:0.8rem; color:var(--text-muted);">Prognose: <span id="valProjected" style="color:#fff">0h</span></div>
+                </div>
+                <div class="card" style="display:flex; flex-direction:column; justify-content:center;">
+                    <div class="ring-lbl">Ø TÄGLICH</div>
+                    <div style="font-size:2rem; font-weight:800; color:#fff; margin:5px 0; font-family:var(--font-mono);" id="valAvg">0.0h</div>
+                    <div style="margin-top:auto; width:100%;">
+                        <div class="ring-lbl" style="margin-bottom:5px; display:flex; justify-content:space-between;">
+                            <span>Urlaubstage</span>
+                            <span>0 / 30</span>
+                        </div>
+                        <div style="height:4px; background:rgba(255,255,255,0.1); border-radius:2px;"><div style="width:0%; background:var(--success); height:100%;"></div></div>
                     </div>
                 </div>
             </div>
-            <div class="card kpi-card" onclick="openCorrection('month')">
-                <div class="progress-ring">
-                    <svg width="100" height="100">
-                        <circle class="ring-bg" cx="50" cy="50" r="42"></circle>
-                        <circle id="ringMonth" class="ring-val" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="264"></circle>
-                    </svg>
-                    <div class="ring-center">
-                        <div class="ring-num" id="valMonth">0</div>
-                        <div class="ring-lbl">Monat</div>
+
+            <div class="charts-row">
+                <div class="card">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">Saldo Trend</div>
+                            <div class="chart-sub">Entwicklung der letzten 30 Tage</div>
+                        </div>
+                    </div>
+                    <div class="trend-container" id="trendChart">
+                        </div>
+                </div>
+
+                <div class="card">
+                    <div class="chart-header">
+                        <div class="chart-title">Verteilung</div>
+                    </div>
+                    <div class="donut-container">
+                        <svg width="150" height="150" viewBox="0 0 100 100" style="transform: rotate(-90deg);">
+                            <circle cx="50" cy="50" r="40" fill="transparent" stroke="rgba(255,255,255,0.05)" stroke-width="12"></circle>
+                            <circle id="donutSick" cx="50" cy="50" r="40" fill="transparent" stroke="var(--danger)" stroke-width="12" stroke-dasharray="0 251"></circle>
+                            <circle id="donutVac" cx="50" cy="50" r="40" fill="transparent" stroke="var(--success)" stroke-width="12" stroke-dasharray="0 251"></circle>
+                            <circle id="donutWork" cx="50" cy="50" r="40" fill="transparent" stroke="var(--primary)" stroke-width="12" stroke-dasharray="0 251"></circle>
+                        </svg>
+                    </div>
+                    <div class="donut-legend">
+                        <div class="legend-item"><div class="dot" style="background:var(--primary)"></div> Arbeit</div>
+                        <div class="legend-item"><div class="dot" style="background:var(--success)"></div> Urlaub</div>
+                        <div class="legend-item"><div class="dot" style="background:var(--danger)"></div> Krank</div>
                     </div>
                 </div>
             </div>
-            <div class="card" style="display:flex; flex-direction:column; justify-content:center;">
-                <div class="ring-lbl">GLEITZEIT KONTO</div>
-                <div style="font-size:2.5rem; font-weight:900; color:var(--primary); margin:10px 0;" id="valTotal">+0.0h</div>
-                <div style="font-size:0.8rem; color:var(--text-muted);">Jahresprognose: <span id="valProjected" style="color:#fff">0h</span></div>
-            </div>
-            <div class="card" style="display:flex; flex-direction:column; justify-content:center;">
-                <div class="ring-lbl">Ø ARBEITZEIT</div>
-                <div style="font-size:2rem; font-weight:800; color:#fff; margin:5px 0;" id="valAvg">0.0h</div>
-                <div class="ring-lbl" style="margin-top:10px;">URLAUBSTAGE</div>
-                <div style="font-size:1.5rem; font-weight:800; color:var(--success);">0 <span style="font-size:0.8rem; color:#666">/ 30</span></div>
-            </div>
-        </div>
 
-        <div class="charts-row">
-            <div class="card">
-                <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
-                    <h3>Saldo Trend</h3>
-                    <span style="font-size:0.8rem; color:var(--text-muted)">Letzte 30 Tage</span>
-                </div>
-                <div class="trend-container" id="trendChart">
+            <div class="card input-wrapper">
+                <div style="display:flex; flex-direction:column; gap:1.25rem;">
+                    <h3 style="font-size:1.1rem;">Eintrag erfassen</h3>
+                    <div style="display:flex; gap:15px;">
+                        <input type="date" id="inpDate" class="glass-input">
+                        <select id="inpType" class="glass-select" onchange="toggleTimeInputs()">
+                            <option value="work">💼 Arbeit</option>
+                            <option value="vacation">🌴 Urlaub</option>
+                            <option value="sick">💊 Krank</option>
+                        </select>
                     </div>
-            </div>
+                    <div style="display:flex; gap:15px;">
+                        <input type="time" id="inpStart" class="glass-input" placeholder="Start">
+                        <input type="time" id="inpEnd" class="glass-input" placeholder="Ende">
+                    </div>
+                    <input type="number" id="inpHours" class="glass-input" step="0.25" placeholder="Stunden manuell...">
+                    
+                    <div style="display:flex; gap:15px; margin-top:auto;">
+                        <button id="mainBtn" class="btn btn-primary" onclick="handleEntry()">Eintrag speichern</button>
+                        <button id="cancelBtn" class="btn" style="background:#222; display:none; flex:1;" onclick="resetEdit()">Abbrechen</button>
+                    </div>
+                </div>
 
-            <div class="card">
-                <h3>Verteilung</h3>
-                <div class="donut-container">
-                    <svg width="140" height="140" viewBox="0 0 100 100" style="transform: rotate(-90deg);">
-                        <circle cx="50" cy="50" r="40" fill="transparent" stroke="#222" stroke-width="12"></circle>
-                        <circle id="donutSick" cx="50" cy="50" r="40" fill="transparent" stroke="var(--danger)" stroke-width="12" stroke-dasharray="0 251"></circle>
-                        <circle id="donutVac" cx="50" cy="50" r="40" fill="transparent" stroke="var(--success)" stroke-width="12" stroke-dasharray="0 251"></circle>
-                        <circle id="donutWork" cx="50" cy="50" r="40" fill="transparent" stroke="var(--primary)" stroke-width="12" stroke-dasharray="0 251"></circle>
-                    </svg>
-                </div>
-                <div class="donut-legend">
-                    <div class="legend-item"><div class="dot" style="background:var(--primary)"></div> Arbeit</div>
-                    <div class="legend-item"><div class="dot" style="background:var(--success)"></div> Urlaub</div>
-                    <div class="legend-item"><div class="dot" style="background:var(--danger)"></div> Krank</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card input-wrapper">
-            <div class="input-group">
-                <div style="display:flex; gap:10px;">
-                    <input type="date" id="inpDate" class="glass-input">
-                    <select id="inpType" class="glass-select" onchange="toggleTimeInputs()">
-                        <option value="work">💼 Arbeit</option>
-                        <option value="vacation">🌴 Urlaub</option>
-                        <option value="sick">💊 Krank</option>
-                    </select>
-                </div>
-                <div style="display:flex; gap:10px;">
-                    <input type="time" id="inpStart" class="glass-input">
-                    <input type="time" id="inpEnd" class="glass-input">
-                </div>
-                <input type="number" id="inpHours" class="glass-input" step="0.25" placeholder="Stunden manuell...">
-            </div>
-
-            <div style="display:flex; flex-direction:column; justify-content:space-between;">
-                <div class="timer-strip">
-                    <span style="font-size:1.5rem;">⏱️</span>
+                <div class="timer-box" id="timerBox">
+                    <span style="color:var(--text-muted); font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;">Live Tracker</span>
                     <div class="timer-display" id="timerDisplay">00:00:00</div>
-                    <button class="btn btn-small" style="background:var(--success); color:#000" onclick="timerAction('start')">Start</button>
-                    <button class="btn btn-small" style="background:#f59e0b; color:#000" onclick="timerAction('pause')">Pause</button>
-                    <button class="btn btn-small" style="background:var(--danger); color:#fff" onclick="timerAction('stop')">Stop</button>
+                    
+                    <div class="btn-icon-row">
+                        <button class="btn btn-ghost" onclick="timerAction('start')" style="color:var(--success)">▶ Start</button>
+                        <button class="btn btn-ghost" onclick="timerAction('pause')" style="color:#fbbf24">II Pause</button>
+                        <button class="btn btn-ghost" onclick="timerAction('stop')" style="color:var(--danger)">■ Stop</button>
+                    </div>
                 </div>
-                
-                <div style="display:flex; gap:10px;">
-                    <button id="mainBtn" class="btn btn-primary" onclick="handleEntry()">EINTRAGEN</button>
-                    <button id="cancelBtn" class="btn" style="background:#333; display:none;" onclick="resetEdit()">ABBRUCH</button>
-                </div>
+            </div>
+
+            <div class="card">
+                <div class="list-header">Letzte Aktivitäten</div>
+                <div id="entryListShort"></div>
             </div>
         </div>
 
-        <div class="card">
-            <h3>Letzte Aktivitäten</h3>
-            <div id="entryList" style="margin-top:1rem;"></div>
+        <div id="view-history" class="view-section">
+            <div class="card">
+                <div class="list-header" style="display:flex; justify-content:space-between;">
+                    <span>Gesamte Historie</span>
+                    <span id="historyCount">0 Einträge</span>
+                </div>
+                <div id="entryListFull"></div>
+            </div>
         </div>
 
     </main>
 
     <div class="modal" id="settingsModal">
         <div class="modal-box">
-            <div style="display:flex; justify-content:space-between; margin-bottom:1.5rem;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:2rem;">
                 <h2>Einstellungen</h2>
                 <button onclick="closeSettings()" style="background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer;">&times;</button>
             </div>
             
-            <h4 style="color:var(--text-muted); margin-bottom:10px;">Dein Name</h4>
-            <input type="text" id="confName" class="glass-input" style="margin-bottom:1.5rem;">
+            <h4 style="color:var(--text-muted); margin-bottom:10px; font-size:0.8rem;">PROFIL</h4>
+            <input type="text" id="confName" class="glass-input" style="margin-bottom:1.5rem;" placeholder="Dein Name">
 
-            <h4 style="color:var(--text-muted); margin-bottom:10px;">Theme Color</h4>
-            <div style="display:flex; gap:10px; margin-bottom:1.5rem;">
+            <h4 style="color:var(--text-muted); margin-bottom:10px; font-size:0.8rem;">DESIGN ACCENT</h4>
+            <div style="display:flex; gap:15px; margin-bottom:2rem;">
                 <div class="color-dot" style="background:#a855f7" onclick="setTheme('#a855f7')"></div>
                 <div class="color-dot" style="background:#3b82f6" onclick="setTheme('#3b82f6')"></div>
+                <div class="color-dot" style="background:#06b6d4" onclick="setTheme('#06b6d4')"></div>
                 <div class="color-dot" style="background:#10b981" onclick="setTheme('#10b981')"></div>
-                <div class="color-dot" style="background:#f43f5e" onclick="setTheme('#f43f5e')"></div>
                 <div class="color-dot" style="background:#f59e0b" onclick="setTheme('#f59e0b')"></div>
+                <div class="color-dot" style="background:#ec4899" onclick="setTheme('#ec4899')"></div>
             </div>
 
-            <h4 style="color:var(--text-muted); margin-bottom:10px;">Auto-Pause (Regel)</h4>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:1.5rem;">
+            <h4 style="color:var(--text-muted); margin-bottom:10px; font-size:0.8rem;">AUTO-PAUSE REGEL</h4>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:1.5rem;">
                 <div>
-                    <label style="font-size:0.7rem;">Ab Stunden:</label>
+                    <label style="font-size:0.7rem; color:#666; display:block; margin-bottom:5px;">Ab Stunden:</label>
                     <input type="number" id="confBreakThresh" class="glass-input" value="6">
                 </div>
                 <div>
-                    <label style="font-size:0.7rem;">Abzug (Min):</label>
+                    <label style="font-size:0.7rem; color:#666; display:block; margin-bottom:5px;">Abzug (Min):</label>
                     <input type="number" id="confBreakMin" class="glass-input" value="30">
                 </div>
             </div>
 
-            <h4 style="color:var(--text-muted); margin-bottom:10px;">Soll-Stunden (Mo-Fr)</h4>
-            <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:5px; margin-bottom:2rem;">
-                <input type="number" id="h1" class="glass-input" style="padding:8px; text-align:center;">
-                <input type="number" id="h2" class="glass-input" style="padding:8px; text-align:center;">
-                <input type="number" id="h3" class="glass-input" style="padding:8px; text-align:center;">
-                <input type="number" id="h4" class="glass-input" style="padding:8px; text-align:center;">
-                <input type="number" id="h5" class="glass-input" style="padding:8px; text-align:center;">
+            <h4 style="color:var(--text-muted); margin-bottom:10px; font-size:0.8rem;">SOLL-STUNDEN (MO-FR)</h4>
+            <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:8px; margin-bottom:2rem;">
+                <input type="number" id="h1" class="glass-input" style="padding:10px; text-align:center;">
+                <input type="number" id="h2" class="glass-input" style="padding:10px; text-align:center;">
+                <input type="number" id="h3" class="glass-input" style="padding:10px; text-align:center;">
+                <input type="number" id="h4" class="glass-input" style="padding:10px; text-align:center;">
+                <input type="number" id="h5" class="glass-input" style="padding:10px; text-align:center;">
             </div>
 
-            <button class="btn btn-primary" onclick="saveSettings()">SPEICHERN</button>
+            <button class="btn btn-primary" onclick="saveSettings()">Einstellungen speichern</button>
         </div>
     </div>
 
     <div class="modal" id="corrModal">
         <div class="modal-box" style="width:400px;">
             <h3>Korrektur buchen</h3>
-            <p style="color:var(--text-muted); margin-bottom:1rem; font-size:0.9rem;">Fügt eine manuelle Differenz zum Konto hinzu.</p>
-            <select id="corrSelect" class="glass-select" style="margin-bottom:10px;"></select>
-            <input type="number" id="corrVal" class="glass-input" placeholder="Stunden (+/-)" style="margin-bottom:1rem;">
-            <button class="btn btn-primary" onclick="saveCorrection()">BUCHEN</button>
-            <button class="btn" style="width:100%; margin-top:10px; background:#333;" onclick="document.getElementById('corrModal').classList.remove('active')">ABBRECHEN</button>
+            <p style="color:var(--text-muted); margin-bottom:1.5rem; font-size:0.9rem;">Manuelle Buchung auf das Gleitzeitkonto.</p>
+            <select id="corrSelect" class="glass-select" style="margin-bottom:15px;"></select>
+            <input type="number" id="corrVal" class="glass-input" placeholder="Stunden (+/-)" step="0.1" style="margin-bottom:2rem;">
+            <button class="btn btn-primary" onclick="saveCorrection()">Buchen</button>
+            <button class="btn" style="width:100%; margin-top:10px; background:transparent; border:1px solid var(--border);" onclick="document.getElementById('corrModal').classList.remove('active')">Abbrechen</button>
         </div>
     </div>
 
@@ -403,9 +444,28 @@
 
     // --- INIT ---
     window.onload = () => {
-        if(localStorage.getItem('tg_data')) data = JSON.parse(localStorage.getItem('tg_data'));
+        if(localStorage.getItem('tg_pro_data')) data = JSON.parse(localStorage.getItem('tg_pro_data'));
+        
+        // Ensure settings object structure exists if loaded from old version
+        if(!data.settings.break) data.settings.break = {thresh:6, min:30};
+        
         applyTheme(data.settings.theme);
         updateUI();
+        
+        // Timer Check
+        const savedTimer = localStorage.getItem('tg_timer');
+        if(savedTimer) {
+            const t = JSON.parse(savedTimer);
+            if(t.running) {
+                timer.start = t.start; timer.paused = t.paused; timer.running = true;
+                timerRun();
+                document.getElementById('timerBox').classList.add('timer-active');
+            } else if (t.paused > 0) {
+                timer.paused = t.paused;
+                displayTimerTime(t.paused);
+            }
+        }
+
         setInterval(() => {
             const now = new Date();
             document.getElementById('currentDate').textContent = now.toLocaleDateString('de-DE', {weekday:'long', day:'2-digit', month:'long'});
@@ -413,7 +473,24 @@
         document.getElementById('inpDate').valueAsDate = new Date();
     };
 
-    function save() { localStorage.setItem('tg_data', JSON.stringify(data)); updateUI(); }
+    function save() { localStorage.setItem('tg_pro_data', JSON.stringify(data)); updateUI(); }
+    function saveTimerState() { localStorage.setItem('tg_timer', JSON.stringify(timer)); }
+
+    // --- TAB LOGIC (THE FIX!) ---
+    function switchTab(tabId) {
+        // Hide all views
+        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        
+        // Show target
+        document.getElementById('view-' + tabId).classList.add('active');
+        const navEl = document.getElementById('nav-' + tabId);
+        if(navEl) navEl.classList.add('active');
+        
+        // Update UI Title
+        const titles = { 'dashboard': 'Übersicht', 'history': 'Gesamte Historie' };
+        document.querySelector('.page-title').textContent = titles[tabId];
+    }
 
     // --- LOGIC ---
     function handleEntry() {
@@ -423,11 +500,10 @@
         const end = document.getElementById('inpEnd').value;
         const direct = document.getElementById('inpHours').value;
 
-        if(!date) return alert('Datum fehlt!');
+        if(!date) return alert('Bitte Datum wählen');
 
         let worked = 0;
-        let dayIndex = new Date(date).getDay(); // 0=Sun, 6=Sat
-        // Adjust index for settings array (0=Sun in JS, but usually handled differently. Let's map JS 0..6 directly to settings)
+        let dayIndex = new Date(date).getDay(); // 0=Sun
         let expected = data.settings.hours[dayIndex] || 0;
         let info = '';
 
@@ -438,20 +514,20 @@
                 let diff = (d2 - d1) / 3.6e6;
                 if(diff < 0) diff += 24;
                 
-                // Auto Break
+                // Auto Break Logic
                 if(data.settings.break.thresh > 0 && diff >= data.settings.break.thresh) {
                     diff -= (data.settings.break.min / 60);
-                    info = `${start}-${end} (Auto-Pause)`;
+                    info = `${start} - ${end} (Auto-Pause)`;
                 } else {
-                    info = `${start}-${end}`;
+                    info = `${start} - ${end}`;
                 }
                 worked = diff;
             } else if (direct) {
                 worked = parseFloat(direct);
                 info = 'Manuell';
-            } else return alert('Zeiten prüfen!');
+            } else return alert('Bitte Zeit oder Stunden eingeben');
         } else {
-            // Sick/Vacation = Target Reached
+            // Sick/Vacation
             worked = expected;
             info = type === 'vacation' ? 'Urlaubstag' : 'Krankmeldung';
         }
@@ -474,7 +550,6 @@
         data.entries.sort((a,b) => new Date(b.date) - new Date(a.date));
         save();
         
-        // Reset Inputs
         document.getElementById('inpStart').value = '';
         document.getElementById('inpEnd').value = '';
         document.getElementById('inpHours').value = '';
@@ -484,29 +559,24 @@
     function updateUI() {
         document.getElementById('userGreeting').innerText = `Hallo, ${data.settings.name}`;
         
-        // Calc Stats
         const now = new Date();
         let week=0, month=0, total=0, totalWorked=0, countDays=0;
         let sickSum=0, vacSum=0, workSum=0;
-        
-        // Trend Data
         let trendData = [];
         let runningTotal = 0;
 
-        // Clone and sort asc for trend
+        // Clone for trend (Oldest first)
         let ascEntries = [...data.entries].sort((a,b) => new Date(a.date) - new Date(b.date));
         
         ascEntries.forEach(e => {
             runningTotal += e.diff;
-            trendData.push(runningTotal); // Simple trend accumulation
-
-            // Sums for Donut
+            trendData.push(runningTotal);
             if(e.type==='sick') sickSum += e.worked;
             else if(e.type==='vacation') vacSum += e.worked;
             else workSum += e.worked;
         });
 
-        // Main Loop (Desc)
+        // Current Stats
         data.entries.forEach(e => {
             const d = new Date(e.date);
             total += e.diff;
@@ -514,99 +584,113 @@
 
             if(d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()) {
                 month += e.diff;
-                // Simple Week Check (Current ISO Week)
                 if(getWeek(d) === getWeek(now)) week += e.diff;
             }
         });
 
-        // Update Radials
         setRadial('ringWeek', 'valWeek', week);
         setRadial('ringMonth', 'valMonth', month);
         
-        // Text Stats
-        document.getElementById('valTotal').innerText = (total>=0?'+':'') + total.toFixed(2) + 'h';
-        document.getElementById('valTotal').style.color = total>=0 ? 'var(--primary)' : 'var(--danger)';
+        const totEl = document.getElementById('valTotal');
+        totEl.innerText = (total>=0?'+':'') + total.toFixed(2) + 'h';
+        totEl.style.color = total>=0 ? 'var(--primary)' : 'var(--danger)';
         
         const avg = countDays > 0 ? totalWorked/countDays : 0;
         document.getElementById('valAvg').innerText = avg.toFixed(1) + 'h';
 
-        // Projections
+        // Projection
         const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
         const dailyDrift = dayOfYear > 0 ? total / dayOfYear : 0;
         const projected = total + (dailyDrift * (365 - dayOfYear));
         document.getElementById('valProjected').innerText = (projected>=0?'+':'') + projected.toFixed(0) + 'h';
 
-        renderList();
+        renderLists();
         renderTrend(trendData);
         renderDonut(workSum, vacSum, sickSum);
     }
 
     function setRadial(ringId, txtId, val) {
-        // Max range assumption for visual: +/- 10h
         const el = document.getElementById(ringId);
         const txt = document.getElementById(txtId);
-        // Circle circumference 264 (r=42)
-        // Let's map val to progress. 0 = 50%, +10 = 100%, -10 = 0%
-        let pct = 0.5 + (val / 40); // 20h range
+        // Circle 276 (r=44)
+        // range +/- 10h
+        let pct = 0.5 + (val / 40); 
         if(pct > 1) pct = 1; if(pct < 0) pct = 0;
         
-        const offset = 264 - (pct * 264);
+        const offset = 276 - (pct * 276);
         el.style.strokeDashoffset = offset;
-        el.style.stroke = val >= 0 ? 'var(--primary)' : 'var(--danger)';
+        
+        if(val < 0) el.style.stroke = 'var(--danger)';
+        else el.style.stroke = 'var(--primary)';
         
         txt.innerText = (val>=0?'+':'') + val.toFixed(1) + 'h';
     }
 
-    function renderList() {
-        const c = document.getElementById('entryList');
-        c.innerHTML = data.entries.map(e => `
+    function renderLists() {
+        const createRow = (e) => `
             <div class="entry-row type-${e.type}">
-                <div style="width:100px; font-weight:bold;">${new Date(e.date).toLocaleDateString('de-DE')}</div>
-                <div style="flex:1; font-size:0.85rem; color:#aaa;">${e.isPeriod ? e.label : e.info}</div>
-                <div class="tag" style="margin-right:10px;">${e.type}</div>
-                <div style="font-weight:bold; width:60px; text-align:right; color:${e.diff>=0?'var(--success)':'var(--danger)'}">
-                    ${e.diff>=0?'+':''}${e.diff.toFixed(2)}
+                <div>
+                    <div class="entry-date">${new Date(e.date).toLocaleDateString('de-DE')}</div>
+                    <div class="entry-meta">${e.isPeriod ? e.label : e.info}</div>
                 </div>
-                <div style="margin-left:15px;">
-                    <button class="btn-icon" onclick="editEntry(${e.id})">✎</button>
-                    <button class="btn-icon" onclick="delEntry(${e.id})">×</button>
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <span class="tag">${e.type}</span>
+                    <div style="font-weight:700; width:60px; text-align:right; color:${e.diff>=0?'var(--success)':'var(--danger)'}">
+                        ${e.diff>=0?'+':''}${e.diff.toFixed(2)}
+                    </div>
+                    <div>
+                        <button class="btn-ghost" style="padding:5px;" onclick="editEntry(${e.id})">✎</button>
+                        <button class="btn-ghost" style="padding:5px; color:var(--danger)" onclick="delEntry(${e.id})">×</button>
+                    </div>
                 </div>
             </div>
-        `).join('');
+        `;
+
+        // Dashboard List (Limit 5)
+        document.getElementById('entryListShort').innerHTML = data.entries.slice(0, 5).map(createRow).join('');
+        
+        // Full List
+        document.getElementById('entryListFull').innerHTML = data.entries.map(createRow).join('');
+        document.getElementById('historyCount').innerText = `${data.entries.length} Einträge`;
     }
 
-    // --- CHARTS (SVG) ---
+    // --- CHARTS ---
     function renderTrend(dataPoints) {
         const c = document.getElementById('trendChart');
-        if(dataPoints.length < 2) { c.innerHTML = '<div style="text-align:center; padding-top:80px; color:#555;">No Data</div>'; return; }
+        if(dataPoints.length < 2) { c.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; height:100%; color:#555;">Noch keine Daten</div>'; return; }
         
-        // Limit to last 30
-        const subset = dataPoints.slice(-30);
+        const subset = dataPoints.slice(-30); // Last 30
         const max = Math.max(...subset);
         const min = Math.min(...subset);
         const range = max - min || 1;
         
-        const w = c.clientWidth || 600;
+        const w = c.clientWidth;
         const h = 200;
         
         let path = '';
         subset.forEach((val, i) => {
             const x = (i / (subset.length - 1)) * w;
-            const y = h - ((val - min) / range * (h - 20)) - 10; // Padding
+            const y = h - ((val - min) / range * (h - 40)) - 20;
             path += `${i===0?'M':'L'} ${x} ${y} `;
         });
 
         c.innerHTML = `
             <svg class="trend-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+                <defs>
+                    <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:var(--primary);stop-opacity:0.2" />
+                        <stop offset="100%" style="stop-color:var(--primary);stop-opacity:0" />
+                    </linearGradient>
+                </defs>
+                <path d="${path} L ${w} ${h} L 0 ${h} Z" fill="url(#grad)" />
                 <path d="${path}" class="trend-line" />
-                <path d="${path} L ${w} ${h} L 0 ${h} Z" class="trend-area" />
             </svg>
         `;
     }
 
     function renderDonut(work, vac, sick) {
         const total = work + vac + sick || 1;
-        const c = 251; // 2 * pi * 40
+        const c = 251; 
         
         const setSeg = (id, val, offset) => {
             const el = document.getElementById(id);
@@ -625,11 +709,13 @@
     // --- TIMER ---
     function timerAction(act) {
         if(act === 'start') {
-            if(!timer.running) { timer.start = Date.now(); timer.running = true; timerRun(); }
+            if(!timer.running) { timer.start = Date.now(); timer.running = true; timerRun(); document.getElementById('timerBox').classList.add('timer-active'); }
         } else if(act === 'pause') {
             timer.running = false; timer.paused += Date.now() - timer.start;
+            document.getElementById('timerBox').classList.remove('timer-active');
         } else if(act === 'stop') {
             timer.running = false; 
+            document.getElementById('timerBox').classList.remove('timer-active');
             let total = timer.paused + (Date.now() - timer.start);
             let h = total / 3.6e6;
             if(confirm(`Zeit stoppen: ${h.toFixed(2)}h?`)) {
@@ -638,23 +724,27 @@
                 document.getElementById('inpDate').valueAsDate = new Date();
                 handleEntry();
                 timer = {id:null, start:0, paused:0, running:false};
-                document.getElementById('timerDisplay').innerText = "00:00:00";
+                displayTimerTime(0);
             }
         }
+        saveTimerState();
     }
     
     function timerRun() {
         if(!timer.running) return;
         requestAnimationFrame(timerRun);
         const diff = (Date.now() - timer.start) + timer.paused;
-        const h = Math.floor(diff / 3600000);
-        const m = Math.floor((diff % 3600000) / 60000);
-        const s = Math.floor((diff % 60000) / 1000);
-        document.getElementById('timerDisplay').innerText = 
-            `${h<10?'0'+h:h}:${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
+        displayTimerTime(diff);
+    }
+    
+    function displayTimerTime(ms) {
+        const h = Math.floor(ms / 3600000);
+        const m = Math.floor((ms % 3600000) / 60000);
+        const s = Math.floor((ms % 60000) / 1000);
+        document.getElementById('timerDisplay').innerText = `${h<10?'0'+h:h}:${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
     }
 
-    // --- SETTINGS & HELPERS ---
+    // --- SETTINGS ---
     function openSettings() {
         document.getElementById('settingsModal').classList.add('active');
         document.getElementById('confName').value = data.settings.name;
@@ -680,10 +770,9 @@
     
     function applyTheme(hex) {
         document.documentElement.style.setProperty('--primary', hex);
-        // Generate RGB for simple alpha usage
         const r = parseInt(hex.slice(1,3), 16), g = parseInt(hex.slice(3,5), 16), b = parseInt(hex.slice(5,7), 16);
         document.documentElement.style.setProperty('--primary-rgb', `${r},${g},${b}`);
-        document.documentElement.style.setProperty('--primary-dim', `rgba(${r},${g},${b}, 0.2)`);
+        document.documentElement.style.setProperty('--primary-dim', `rgba(${r},${g},${b}, 0.15)`);
     }
 
     function editEntry(id) {
@@ -692,13 +781,14 @@
         document.getElementById('inpDate').value = e.date;
         document.getElementById('inpType').value = e.type;
         document.getElementById('inpHours').value = e.worked;
-        document.getElementById('mainBtn').innerText = "UPDATE";
+        document.getElementById('mainBtn').innerText = "Update Speichern";
         document.getElementById('cancelBtn').style.display = "block";
+        window.scrollTo({top:0, behavior:'smooth'});
     }
     
     function resetEdit() {
         editId = null;
-        document.getElementById('mainBtn').innerText = "EINTRAGEN";
+        document.getElementById('mainBtn').innerText = "Eintrag speichern";
         document.getElementById('cancelBtn').style.display = "none";
         document.getElementById('inpStart').value = '';
         document.getElementById('inpEnd').value = '';
@@ -712,14 +802,11 @@
         }
     }
 
-    // --- CORRECTION MODAL ---
-    let corrType = '';
+    // --- CORRECTION ---
     function openCorrection(type) {
-        corrType = type;
         const modal = document.getElementById('corrModal');
         const sel = document.getElementById('corrSelect');
         sel.innerHTML = '';
-        
         const now = new Date();
         if(type === 'week') {
             for(let i=0; i<20; i++) {
@@ -739,7 +826,6 @@
         const val = parseFloat(document.getElementById('corrVal').value);
         if(!val) return;
         const sel = document.getElementById('corrSelect');
-        
         data.entries.push({
             id: Date.now(),
             date: new Date().toISOString().split('T')[0],
@@ -767,7 +853,7 @@
     function exportData() {
         const a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], {type:'application/json'}));
-        a.download = 'time_god_backup.json';
+        a.download = 'time_pro_backup.json';
         a.click();
     }
     
