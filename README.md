@@ -1,4 +1,3 @@
-````markdown
 # Arbeitszeiterfassung — Zeit_Rechner
 
 Eine kleine, lokale HTML-App zur schnellen Erfassung und Auswertung von Arbeitszeiten. Die App speichert Einträge in `localStorage`, bietet Export/Import als JSON, einfache Bearbeitung von Einträgen, Undo für Löschvorgänge und eine "Alle löschen"-Funktion.
@@ -77,8 +76,6 @@ Für Bugreports oder Feature-Requests nutze bitte die Issue-Templates (`.github/
 ## Lizenz
 
 Dieses Projekt steht unter der MIT-Lizenz — siehe `LICENSE`.
-````
-=======
 **Weiterentwicklung (Vorschläge)**
 - CSV-Export für Excel/Sheets.
 - Datumsauswahl beim Anlegen eines Eintrags (aktuell wird heutiges Datum verwendet).
